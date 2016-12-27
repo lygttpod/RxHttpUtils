@@ -1,6 +1,25 @@
 # RxHttpUtils
 ##Rxjava+Retrofit封装，便捷使用
 
+###添加Gradle依赖 
+
+先在项目根目录的 build.gradle 的 repositories 添加:
+
+     allprojects {
+         repositories {
+            ...
+            maven { url "https://jitpack.io" }
+        }
+    }
+    
+ 然后在dependencies添加:
+ 
+        dependencies {
+        ...
+        compile 'com.github.lygttpod:RxHttpUtils:1.0.1'
+        }
+
+
 #使用说明
 
 ###1、使用前自己的application类必须继承BaseApplication
