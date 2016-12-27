@@ -3,6 +3,7 @@ package com.allen.library.http;
 
 import com.allen.library.interceptor.OkHttpRequestInterceptor;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -35,14 +36,18 @@ public class RetrofitClient {
      *
      * @return retrofitBuilder
      */
-    public static Retrofit getInstance() {
+    public static Retrofit getInstance(Map<String, Object> headerMaps) {
 
         if (retrofitBuilder == null) {
             retrofitBuilder = new Retrofit.Builder().addCallAdapterFactory(RxJavaCallAdapterFactory.create());
-            requestInterceptor = new OkHttpRequestInterceptor();
             loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
+        }
+        if (headerMaps != null) {
+            requestInterceptor = new OkHttpRequestInterceptor(headerMaps);
+        } else {
+            requestInterceptor = new OkHttpRequestInterceptor();
         }
 
         retrofitBuilder.baseUrl(baseUrl).addConverterFactory(GsonConverterFactory.create()).client(getClient());
@@ -56,15 +61,18 @@ public class RetrofitClient {
      * @param baseUrl 传入baseUrl
      * @return retrofitBuilder
      */
-    public static Retrofit getInstance(String baseUrl) {
+    public static Retrofit getInstance(String baseUrl, Map<String, Object> headerMaps) {
 
         if (retrofitBuilder == null) {
             retrofitBuilder = new Retrofit.Builder().addCallAdapterFactory(RxJavaCallAdapterFactory.create());
-            requestInterceptor = new OkHttpRequestInterceptor();
             loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         }
-
+        if (headerMaps != null) {
+            requestInterceptor = new OkHttpRequestInterceptor(headerMaps);
+        } else {
+            requestInterceptor = new OkHttpRequestInterceptor();
+        }
         retrofitBuilder.baseUrl(baseUrl).addConverterFactory(GsonConverterFactory.create()).client(getClient());
 
         return retrofitBuilder.build();

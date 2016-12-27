@@ -1,6 +1,9 @@
 package com.allen.library.http;
 
 
+import java.util.Map;
+import java.util.TreeMap;
+
 /**
  * Created by allen on 2016/12/20.
  * <p>
@@ -12,8 +15,10 @@ public class RxHttpUtils {
     private static RxHttpUtils mRxHttpUtils;
 
     private static String mBaseUrl;
+    private static Map<String, Object> mHeaderMaps = new TreeMap<>();
 
     public static RxHttpUtils getInstance() {
+        mHeaderMaps.clear();
         mBaseUrl = "";
         if (mRxHttpUtils == null) {
             mRxHttpUtils = new RxHttpUtils();
@@ -22,6 +27,7 @@ public class RxHttpUtils {
     }
 
     public static RxHttpUtils getInstance(String baseUrl) {
+        mHeaderMaps.clear();
         mBaseUrl = baseUrl;
         if (mRxHttpUtils == null) {
             mRxHttpUtils = new RxHttpUtils();
@@ -31,10 +37,15 @@ public class RxHttpUtils {
 
     public <K> K createApi(final Class<K> cls) {
         if ("".equals(mBaseUrl) || mBaseUrl == null) {
-            return RetrofitClient.getInstance().create(cls);
+            return RetrofitClient.getInstance(mHeaderMaps).create(cls);
         } else {
-            return RetrofitClient.getInstance(mBaseUrl).create(cls);
+            return RetrofitClient.getInstance(mBaseUrl, mHeaderMaps).create(cls);
         }
+    }
+
+    public RxHttpUtils addHeader(Map<String, Object> headerMaps) {
+        mHeaderMaps = headerMaps;
+        return mRxHttpUtils;
     }
 
 }

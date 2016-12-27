@@ -14,6 +14,9 @@ import com.allen.library.interceptor.RxHelper;
 import com.allen.rxhttputils.api.ApiService;
 import com.allen.rxhttputils.bean.Banner;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -55,8 +58,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void request1() {
 
+        Map<String ,Object> map = new TreeMap<>();
+        map.put("version","8.8");
+        map.put("phoneType","android");
+
         RxHttpUtils
                 .getInstance()
+                .addHeader(map)
                 .createApi(ApiService.class)
                 .getBanner()
                 .compose(RxHelper.<Banner>io_main())
