@@ -30,9 +30,15 @@ Rxjava+Retrofit封装，便捷使用
                 
 3、参数说明
 
-                getInstance(your_base_url)            可以动态修改baseUrl
-                addHeader(map)                        动态设置请求头《可以不添加》
-                ApiService.class                      是自己定义的
-                getBanner()                           需要需不需要添加参数根据自己的定义设置
-                io_main(loadingDialog)                可以设置自己请求开始的loading对话框
-                new CommonSubscriber<Banner>(loadingDialog)需要显示loading对话框的话这里需要传入自己的Dialog
+                getInstance(your_base_url)
+                可以动态修改baseUrl
+                addHeader(map)
+                动态设置请求头《可以不添加》
+                ApiService.class
+                是自己定义的
+                getBanner()
+                需要需不需要添加参数根据自己的定义设置
+                io_main(loadingDialog)
+                可以设置自己请求开始的loading对话框
+                new CommonSubscriber<Banner>(loadingDialog)
+                需要显示loading对话框的话这里需要传入自己的Dialog
