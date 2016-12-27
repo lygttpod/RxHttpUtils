@@ -1,32 +1,38 @@
 # RxHttpUtils
 Rxjava+Retrofit封装，便捷使用
 
-      RxHttpUtils
-                //.getInstance(your_base_url)
-                .getInstance()
-                .createApi(ApiService.class)
-                .getBanner()                
-                .compose(RxHelper.<Banner>io_main())
-                .subscribe(new CommonSubscriber<Banner>() {
-                    @Override
-                    protected void onError(String errorMsg) {
+使用说明
 
-                    }
+1、使用前自己的application类必须继承BaseApplication
 
-                    @Override
-                    protected void onSuccess(Banner banner) {
-                        Toast.makeText(MainActivity.this, banner.getBanners().get(0).getTitle(), Toast.LENGTH_LONG).show();
-                    }
-                });
-                //传入自己的loading View 会自动在请求开始的时候显示loading
-                //.compose(RxHelper.<Banner>io_main(loadingDialog))            
-                //传入自己的loading View 会自动在请求开始的时候显示loading
-                //.subscribe(new CommonSubscriber<Banner>(loadingDialog) {
-                //    @Override
-                //    protected void onError(String errorMsg) {
-                //    }
-                //   @Override
-                //    protected void onSuccess(Banner banner) {
-                //       Toast.makeText(MainActivity.this, banner.getBanners().get(0).getTitle(), Toast.LENGTH_LONG).show();
-                //   }
-                //});
+2、自己定义的实体类需要继承BaseResponse基类
+
+            Map<String ,Object> map = new TreeMap<>();
+            map.put("version","8.8");
+            map.put("phoneType","android");
+        
+            RxHttpUtils                
+                        .getInstance()                              
+                        .addHeader(map)                             
+                        .createApi(ApiService.class)                
+                        .getBanner()                                               
+                        .compose(RxHelper.<Banner>io_main())        
+                        .subscribe(new CommonSubscriber<Banner>() {                                   
+                              @Override
+                               protected void onError(String errorMsg) {
+                              }
+
+                              @Override
+                              protected void onSuccess(Banner banner) {
+                                    Toast.makeText(MainActivity.this, banner.getBanners().get(0).getTitle(), Toast.LENGTH_LONG).show();
+                              }
+                        });      
+                
+3、参数说明
+
+                getInstance(your_base_url)            可以动态修改baseUrl
+                addHeader(map)                        动态设置请求头《可以不添加》
+                ApiService.class                      是自己定义的
+                getBanner()                           需要需不需要添加参数根据自己的定义设置
+                io_main(loadingDialog)                可以设置自己请求开始的loading对话框
+                new CommonSubscriber<Banner>(loadingDialog)需要显示loading对话框的话这里需要传入自己的Dialog
