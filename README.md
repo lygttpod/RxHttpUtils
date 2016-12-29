@@ -1,6 +1,12 @@
 # RxHttpUtils
 ##Rxjava+Retrofit封装，便捷使用
 
+继上次[**SuperTextView**](https://github.com/lygttpod/SuperTextView)之后的又一次封装
+
+编写原由：
+项目用到Rxjava+Retrofit的使用，总是感觉封装的不到位，网上也有很多类此的封装，找来找去没有一款适合自己的，无奈之下只能自己动手封装一个使用起来超级简单的网络框架，个人感觉装装的还是挺不错的，相比网络上其他封装简单了不少，使用起来也很方便，源码很少可以随意修改源码达到自己需要的效果，废话不多说了，请看怎么使用！
+
+
 ###添加Gradle依赖 
 
 先在项目根目录的 build.gradle 的 repositories 添加:
@@ -94,16 +100,17 @@
 # [**传送门**](https://github.com/lygttpod/RxHttpUtils)
 
 #License
-         Copyright 2016 Allen
+         Copyright 2016 Allen
 
-        Licensed under the Apache License, Version 2.0 (the "License");
-        you may not use this file except in compliance with the License.
-        You may obtain a copy of the License at
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
 
-          [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+          http://www.apache.org/licenses/LICENSE-2.0
 
-        Unless required by applicable law or agreed to in writing, software
-        distributed under the License is distributed on an "AS IS" BASIS,
-        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        See the License for the specific language governing permissions and
-    limitations under the License.*斜体*
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
