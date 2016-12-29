@@ -63,3 +63,47 @@
             可以设置自己请求开始的loading对话框
             6、new CommonSubscriber<Banner>(loadingDialog)
             需要显示loading对话框的话这里需要传入自己的Dialog
+            
+            
+
+###5、注意事项：
+适合请求结果是以下情况的（当然用户可以根据自己的实际需求稍微修改一下代码就能满足自己的需求）
+
+            
+            code为错误状态码，为0时表示无错误; msg为错误描述信息
+            注意：请求成功时，msg字段可有可无。
+            {
+            code: 0/400/401...,
+            msg: 错误描述...,
+            ...
+            ...
+            ...
+            }
+            如果你的服务器返回不是以上格式不要惊慌，下载源码，源码其实很简单，自己重写一个BaseResponse基类，根据自己需求处理，
+            修改一下BaseSubscriber和ISubscriber中泛型继承的类就行了
+
+###6、后面会陆续完成上传和下载的封装，敬请期待...
+
+
+# 意见反馈
+
+如果遇到问题或者好的建议，请反馈到我的邮箱：[lygttpod@163.com](mailto:lygttpod@163.com) 或者[lygttpod@gmail.com](mailto:lygttpod@gmail.com)
+
+如果觉得对你有用的话，点一下右上的星星赞一下吧!
+
+# [**传送门**](https://github.com/lygttpod/RxHttpUtils)
+
+#License
+         Copyright 2016 Allen
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+
+          [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+    limitations under the License.*斜体*
