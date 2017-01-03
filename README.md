@@ -22,7 +22,7 @@
  
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:1.0.1'
+        compile 'com.github.lygttpod:RxHttpUtils:1.0.2'
         }
 
 
@@ -90,6 +90,10 @@
 
 ###6、后面会陆续完成上传和下载的封装，敬请期待...
 
+#更新日志
+
+### V1.0.2
+* 	新增网络缓存
 
 # 意见反馈
 
