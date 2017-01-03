@@ -20,7 +20,7 @@ import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button button1, button2, button3;
+    private Button button1, button2, button3,button4;
     private Dialog dialog;
 
     @Override
@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button2.setOnClickListener(this);
         button3 = (Button) findViewById(R.id.button3);
         button3.setOnClickListener(this);
+        button4 = (Button) findViewById(R.id.button4);
+        button4.setOnClickListener(this);
     }
 
     @Override
@@ -48,8 +50,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.button3:
                 request3();
                 break;
+            case R.id.button4:
+                break;
         }
     }
+
 
     /**
      * 单一请求链式操作，直观明了

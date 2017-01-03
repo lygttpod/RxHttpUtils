@@ -1,11 +1,16 @@
 package com.allen.library.http;
 
 
+import android.os.Environment;
+
+import com.allen.library.interceptor.CacheInterceptor;
 import com.allen.library.interceptor.OkHttpRequestInterceptor;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -31,6 +36,8 @@ public class RetrofitClient {
 
     private static OkHttpRequestInterceptor requestInterceptor;
 
+    private static CacheInterceptor cacheInterceptor;
+    private static Cache cache;
     /**
      * 无参数  实例化
      *
@@ -42,7 +49,7 @@ public class RetrofitClient {
             retrofitBuilder = new Retrofit.Builder().addCallAdapterFactory(RxJavaCallAdapterFactory.create());
             loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
+            cacheInterceptor = new CacheInterceptor();
         }
         if (headerMaps != null) {
             requestInterceptor = new OkHttpRequestInterceptor(headerMaps);
@@ -85,10 +92,16 @@ public class RetrofitClient {
      * @return OkHttpClient
      */
     public static OkHttpClient getClient() {
+        if (cache==null){
+            cache = new Cache(new File(Environment.getExternalStorageDirectory().getPath() + "/rxHttpCacheData"), 1024 * 1024 * 100);
+        }
 
         OkHttpClient httpClient = new OkHttpClient.Builder()
                 .addInterceptor(requestInterceptor)
                 .addInterceptor(loggingInterceptor)
+                .addInterceptor(cacheInterceptor)
+                .addNetworkInterceptor(cacheInterceptor)
+                .cache(cache)
                 .readTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .connectTimeout(10, TimeUnit.SECONDS)

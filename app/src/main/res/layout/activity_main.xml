@@ -23,5 +23,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="retrofit链式发送多个请求" />
+    <Button
+        android:visibility="gone"
+        android:id="@+id/button4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="retrofit上传图片(以二进制文件上传)" />
 
 </LinearLayout>
