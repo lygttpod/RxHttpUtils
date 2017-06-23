@@ -1,5 +1,5 @@
 # RxHttpUtils
-##Rxjava+Retrofit封装，便捷使用
+## Rxjava+Retrofit封装，便捷使用
 
 继上次[**SuperTextView**](https://github.com/lygttpod/SuperTextView)之后的又一次封装
 
@@ -7,7 +7,7 @@
 项目用到Rxjava+Retrofit的使用，总是感觉封装的不到位，网上也有很多类此的封装，找来找去没有一款适合自己的，无奈之下只能自己动手封装一个使用起来超级简单的网络框架，个人感觉装装的还是挺不错的，相比网络上其他封装简单了不少，使用起来也很方便，源码很少可以随意修改源码达到自己需要的效果，废话不多说了，请看怎么使用！
 
 
-###添加Gradle依赖 
+### 添加Gradle依赖 
 
 先在项目根目录的 build.gradle 的 repositories 添加:
 
@@ -26,13 +26,13 @@
         }
 
 
-#使用说明
+# 使用说明
 
-###1、使用前自己的application类必须继承BaseApplication
+### 1、使用前自己的application类必须继承BaseApplication
 
-###2、自己定义的实体类需要继承BaseResponse基类
+### 2、自己定义的实体类需要继承BaseResponse基类
 
-###3、示例
+### 3、示例
 
     Map<String ,Object> map = new TreeMap<>();
             map.put("version","8.8");
@@ -55,7 +55,7 @@
                     }
                 }); 
                 
-###4、参数说明
+### 4、参数说明
 
             1、getInstance(your_base_url)
             可以动态修改baseUrl
@@ -72,7 +72,7 @@
             
             
 
-###5、注意事项：
+### 5、注意事项：
 适合请求结果是以下情况的（当然用户可以根据自己的实际需求稍微修改一下代码就能满足自己的需求）
 
             
@@ -88,9 +88,9 @@
             如果你的服务器返回不是以上格式不要惊慌，下载源码，源码其实很简单，自己重写一个BaseResponse基类，根据自己需求处理，
             修改一下BaseSubscriber和ISubscriber中泛型继承的类就行了
 
-###6、后面会陆续完成上传和下载的封装，敬请期待...
+### 6、后面会陆续完成上传和下载的封装，敬请期待...
 
-#更新日志
+# 更新日志
 
 ### V1.0.2
 * 	新增网络缓存
