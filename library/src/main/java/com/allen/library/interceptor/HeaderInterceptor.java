@@ -1,9 +1,6 @@
 package com.allen.library.interceptor;
 
-
-import com.allen.library.base.BaseApplication;
 import com.allen.library.utils.AppUtils;
-import com.allen.library.utils.SPUtils;
 
 import java.io.IOException;
 import java.util.Map;
@@ -14,39 +11,34 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Created by allen on 2016/12/20.
+ * Created by Allen on 2017/5/3.
  * <p>
- * okHttp请求拦截器
- * 统一添加请求头
+ * 请求拦截器  统一添加请求头使用
  */
 
-public class OkHttpRequestInterceptor implements Interceptor {
+public class HeaderInterceptor implements Interceptor {
 
     private Map<String, Object> headerMaps = new TreeMap<>();
 
-    public OkHttpRequestInterceptor(Map<String, Object> headerMaps) {
+    public HeaderInterceptor(Map<String, Object> headerMaps) {
         this.headerMaps = headerMaps;
-    }
-
-    public OkHttpRequestInterceptor() {
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request.Builder request = chain.request().newBuilder();
-        if (headerMaps == null || headerMaps.size() == 0) {
-            request
-                    .addHeader("Authorization", getToken())
-                    .addHeader("Content-type", "application/json")
-                    .addHeader("Version", getAppVersion())
-                    .addHeader("Terminal", 0 + "")
-                    .addHeader("X-Request-Id", getUUID())
-                    .addHeader("User-Agent", System.getProperty("http.agent"));
-        } else {
+        if (headerMaps != null && headerMaps.size() > 0) {
             for (Map.Entry<String, Object> entry : headerMaps.entrySet()) {
                 request.addHeader(entry.getKey(), (String) entry.getValue());
             }
+        } else {
+            request
+                    .addHeader("Content-type", "application/json")
+                    .addHeader("Version", getAppVersion())
+                    .addHeader("uuid", getUUID())
+                    .addHeader("User-Agent", System.getProperty("http.agent"));
         }
+
 
         return chain.proceed(request.build());
     }
@@ -58,10 +50,5 @@ public class OkHttpRequestInterceptor implements Interceptor {
     private String getAppVersion() {
         return AppUtils.getAppVersion();
     }
-
-    private String getToken() {
-        return (String) SPUtils.get(BaseApplication.getContext(), "token", "");
-    }
-
 
 }

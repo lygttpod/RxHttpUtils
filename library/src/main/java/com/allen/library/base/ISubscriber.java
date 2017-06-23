@@ -1,5 +1,7 @@
 package com.allen.library.base;
 
+import io.reactivex.disposables.Disposable;
+
 /**
  * Created by allen on 2016/12/21.
  * <p>
@@ -8,7 +10,7 @@ package com.allen.library.base;
 
 public interface ISubscriber<T extends BaseResponse> {
 
-    //      void doOnError(Throwable e);
+    void doOnSubscribe(Disposable d);
 
     void doOnError(String errorMsg);
 

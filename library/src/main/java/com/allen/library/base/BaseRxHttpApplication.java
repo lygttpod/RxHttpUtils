@@ -9,7 +9,7 @@ import android.content.Context;
  * Application基类
  */
 
-public class BaseApplication extends Application {
+public class BaseRxHttpApplication extends Application {
 
     private static Context context;
 

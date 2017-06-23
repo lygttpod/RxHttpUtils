@@ -6,7 +6,8 @@ import android.content.pm.PackageManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
-import com.allen.library.base.BaseApplication;
+
+import com.allen.library.base.BaseRxHttpApplication;
 
 import java.util.UUID;
 
@@ -27,8 +28,8 @@ public class AppUtils {
         PackageInfo pi;
         String versionNum;
         try {
-            PackageManager pm = BaseApplication.getContext().getPackageManager();
-            pi = pm.getPackageInfo(BaseApplication.getContext().getPackageName(), PackageManager.GET_CONFIGURATIONS);
+            PackageManager pm = BaseRxHttpApplication.getContext().getPackageManager();
+            pi = pm.getPackageInfo(BaseRxHttpApplication.getContext().getPackageName(), PackageManager.GET_CONFIGURATIONS);
             versionNum = pi.versionName;
         } catch (Exception e) {
             versionNum = "0";
@@ -46,7 +47,7 @@ public class AppUtils {
      */
     public static String getUUID() {
 
-        Context context = BaseApplication.getContext();
+        Context context = BaseRxHttpApplication.getContext();
 
         String uuid = (String) SPUtils.get(context, "PHONE_UUID", "");
 

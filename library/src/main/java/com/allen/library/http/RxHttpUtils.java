@@ -1,51 +1,90 @@
 package com.allen.library.http;
 
+import com.allen.library.download.DownloadRetrofit;
+import com.allen.library.upload.UploadRetrofit;
 
-import java.util.Map;
-import java.util.TreeMap;
+
+import io.reactivex.Observable;
+
+import okhttp3.ResponseBody;
 
 /**
- * Created by allen on 2016/12/20.
- * <p>
- * 网络请求工具类封装
+ * Created by allen on 2017/6/22.
+ * 网络请求
  */
 
 public class RxHttpUtils {
 
-    private static RxHttpUtils mRxHttpUtils;
-
-    private static String mBaseUrl;
-    private static Map<String, Object> mHeaderMaps = new TreeMap<>();
+    private static RxHttpUtils instance;
 
     public static RxHttpUtils getInstance() {
-        mHeaderMaps.clear();
-        mBaseUrl = "";
-        if (mRxHttpUtils == null) {
-            mRxHttpUtils = new RxHttpUtils();
+        if (instance == null) {
+            synchronized (RxHttpUtils.class) {
+                if (instance == null) {
+                    instance = new RxHttpUtils();
+                }
+            }
+
         }
-        return mRxHttpUtils;
+        return instance;
     }
 
-    public static RxHttpUtils getInstance(String baseUrl) {
-        mHeaderMaps.clear();
-        mBaseUrl = baseUrl;
-        if (mRxHttpUtils == null) {
-            mRxHttpUtils = new RxHttpUtils();
-        }
-        return mRxHttpUtils;
+    public GlobalRxHttp config() {
+        return GlobalRxHttp.getInstance();
     }
 
-    public <K> K createApi(final Class<K> cls) {
-        if ("".equals(mBaseUrl) || mBaseUrl == null) {
-            return RetrofitClient.getInstance(mHeaderMaps).create(cls);
-        } else {
-            return RetrofitClient.getInstance(mBaseUrl, mHeaderMaps).create(cls);
-        }
+
+    /**
+     * 使用全局参数创建请求
+     *
+     * @param cls
+     * @param <K>
+     * @return
+     */
+    public static <K> K createApi(Class<K> cls) {
+        return GlobalRxHttp.createGApi(cls);
     }
 
-    public RxHttpUtils addHeader(Map<String, Object> headerMaps) {
-        mHeaderMaps = headerMaps;
-        return mRxHttpUtils;
+    /**
+     * 获取单个请求配置实例
+     *
+     * @return
+     */
+    public static SingleRxHttp getSInstance() {
+
+        return SingleRxHttp.getInstance();
     }
 
+    /**
+     * 使用自己自定义参数创建请求createSingleApi
+     *
+     * @param cls
+     * @param <K>
+     * @return
+     */
+    public <K> K createSApi(Class<K> cls) {
+        return getSInstance().getSingleRetrofitBuilder().build().create(cls);
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param fileUrl
+     * @return
+     */
+    public static Observable<ResponseBody> downloadFile(String fileUrl) {
+        return DownloadRetrofit.downloadFile(fileUrl);
+    }
+
+    /**
+     * 上传单张图片
+     *
+     * @param uploadUrl
+     * @param filePath
+     * @return
+     */
+    public static Observable<ResponseBody> uploadImg(String uploadUrl, String filePath) {
+        return UploadRetrofit.uploadImg(uploadUrl, filePath);
+
+    }
 }

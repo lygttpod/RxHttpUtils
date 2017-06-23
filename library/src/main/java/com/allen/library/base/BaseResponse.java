@@ -6,7 +6,7 @@ package com.allen.library.base;
  * 请求结果基类   所有请求结果继承此类
  */
 
-public class BaseResponse {
+public class BaseResponse implements Cloneable{
 
     /**
      * 错误码
@@ -39,5 +39,15 @@ public class BaseResponse {
                 "code=" + code +
                 ", msg='" + msg + '\'' +
                 '}';
+    }
+
+    public Object clone() {
+        BaseResponse o = null;
+        try {
+            o = (BaseResponse) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return o;
     }
 }

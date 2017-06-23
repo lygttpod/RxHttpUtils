@@ -4,7 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.allen.library.base.BaseApplication;
+
+import com.allen.library.base.BaseRxHttpApplication;
 
 import java.io.IOException;
 
@@ -52,7 +53,7 @@ public class CacheInterceptor implements Interceptor {
      * @return 返回值
      */
     public static boolean isNetworkConnected() {
-        Context context = BaseApplication.getContext();
+        Context context = BaseRxHttpApplication.getContext();
         if (context != null) {
             ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
