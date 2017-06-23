@@ -1,12 +1,12 @@
 package com.allen.library.base;
 
 /**
- * Created by allen on 2016/12/21.
+ * Created by allen on 2017/6/23.
  * <p>
  * 请求结果基类   所有请求结果继承此类
  */
 
-public class BaseResponse implements Cloneable{
+public class BaseResponse {
 
     /**
      * 错误码
@@ -41,13 +41,4 @@ public class BaseResponse implements Cloneable{
                 '}';
     }
 
-    public Object clone() {
-        BaseResponse o = null;
-        try {
-            o = (BaseResponse) super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        return o;
-    }
 }

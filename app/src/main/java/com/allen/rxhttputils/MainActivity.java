@@ -65,28 +65,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.single_http:
 
                 RxHttpUtils
+                        //单个请求的实例getSInstance(getSingleInstance的缩写)
                         .getSInstance()
+                        //单个请求的baseUrl
                         .baseUrl("https://api.github.com/")
-                        .log(true)
+                        //单个请求的header
                         .addHeaders(headerMaps)
+                        //单个请求是否开启缓存
+                        //.cache(true)
+                        //单个请求的缓存路径及缓存大小，不设置的话有默认值
+                        //.cachePath("cachePath",1024*1024*100)
+                        //ssl证书验证，放在assets目录下的xxx.cer证书
+                        //.certificates("xxx.cer")
+                        //单个请求是否持久化cookie
+                        .saveCookie(true)
+                        //单个请求超时
+                        //.writeTimeout(10)
+                        //.readTimeout(10)
+                        //.connectTimeout(10)
+                        //单个请求是否开启log日志
+                        .log(true)
+                        //区分全局变量的请求createSApi(createSingleApi的缩写)
                         .createSApi(ApiService.class)
+                        //自己ApiService中的方法名
                         .getOctocat()
+                        //内部配置了线程切换相关策略
+                        //如果需要请求loading需要传入自己的loading_dialog
+                        //使用loading的话需要在CommonObserver<XXX>(loading_dialog)中也传去
                         .compose(Transformer.<Octocat>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<Octocat>(loading_dialog) {
                             @Override
                             protected void getDisposable(Disposable d) {
+                                //方法暴露出来使用者根据需求去取消订阅
                                 disposables.add(d);
                             }
 
                             @Override
                             protected void onError(String errorMsg) {
-
+                                //错误处理
                             }
 
                             @Override
                             protected void onSuccess(Octocat octocat) {
                                 String s = octocat.toString();
                                 responseTv.setText(s);
+                                //请求成功
                                 showToast(s);
                             }
                         });

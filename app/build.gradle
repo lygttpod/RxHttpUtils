@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
 android {
     compileSdkVersion 24
     buildToolsVersion '25.0.0'
@@ -10,14 +14,54 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "BASE_URL", "\"http://spenly.com/\""
+        buildConfigField "String", "CertificatesName", "\"YourSSL.cer\""
 
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                // 输出apk名称为XXXX_v1.0_2016-01-15_wandoujia.apk
+                def fileName = "RxHttpUtils_v${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk"
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    productFlavors {
+
+        // 线上环境
+        pro {
+            buildConfigField "String", "BASE_URL", "\"http://spenly.com/\""
+        }
+
+        // 上线前的预览版本
+        releases {
+            buildConfigField "String", "BASE_URL", "\"http://spenly.com/\""
+        }
+
+        // 提测后（测试阶段)
+        master {
+            buildConfigField "String", "BASE_URL", "\"http://spenly.com/\""
+        }
+
+        // 开发阶段
+        dev {
+            buildConfigField "String", "BASE_URL", "\"http://spenly.com/\""
+        }
+
+    }
+
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [CHANNELID: name]
     }
 }
 
