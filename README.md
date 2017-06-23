@@ -1,3 +1,9 @@
+# [**Demo下载地址**](https://fir.im/dzm1) 或者扫码下载demo
+
+<div  align="center">   
+<img src="https://github.com/lygttpod/RxHttpUtils/blob/2.x/rxhttputils.png" width = "480" height = "480" alt="Demo下载地址" align=center /></div>
+</div>
+
 # 重磅推出 RxHttpUtils 2.x 版本
 ## RxJava+Retrofit封装，基于RxJava2和Retrofit2重构，便捷使用
 
