@@ -10,13 +10,11 @@ import android.widget.TextView;
 
 import com.allen.library.download.DownloadObserver;
 import com.allen.library.http.CommonObserver;
-import com.allen.library.http.RxHttpUtils;
+import com.allen.library.RxHttpUtils;
 import com.allen.library.interceptor.Transformer;
 import com.allen.rxhttputils.api.ApiService;
-import com.allen.rxhttputils.bean.FreeHeroBean;
-import com.allen.rxhttputils.bean.HeroListBean;
-import com.allen.rxhttputils.bean.Octocat;
-import com.allen.rxhttputils.bean.ServerListBean;
+import com.allen.rxhttputils.bean.BookBean;
+import com.allen.rxhttputils.bean.Top250Bean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +28,7 @@ import io.reactivex.functions.Function;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button single_http, global_http, multiple_http, download_http, upload_http;
+    private Button single_http_default, single_http, global_http, multiple_http, download_http, upload_http;
     private Dialog loading_dialog;
     private TextView responseTv;
 
@@ -42,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loading_dialog = new AlertDialog.Builder(this).setMessage("loading...").create();
         setContentView(R.layout.activity_main);
         responseTv = (TextView) findViewById(R.id.response_tv);
+        single_http_default = (Button) findViewById(R.id.single_http_default);
+        single_http_default.setOnClickListener(this);
         single_http = (Button) findViewById(R.id.single_http);
         single_http.setOnClickListener(this);
         global_http = (Button) findViewById(R.id.global_http);
@@ -56,44 +56,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        responseTv.setText("");
+
         Map<String, Object> headerMaps = new TreeMap<>();
 
         headerMaps.put("header1", "header1");
         headerMaps.put("header2", "header2");
 
         switch (v.getId()) {
-            case R.id.single_http:
-
+            case R.id.single_http_default:
                 RxHttpUtils
-                        //单个请求的实例getSInstance(getSingleInstance的缩写)
                         .getSInstance()
-                        //单个请求的baseUrl
-                        .baseUrl("https://api.github.com/")
-                        //单个请求的header
-                        .addHeaders(headerMaps)
-                        //单个请求是否开启缓存
-                        //.cache(true)
-                        //单个请求的缓存路径及缓存大小，不设置的话有默认值
-                        //.cachePath("cachePath",1024*1024*100)
-                        //ssl证书验证，放在assets目录下的xxx.cer证书
-                        //.certificates("xxx.cer")
-                        //单个请求是否持久化cookie
-                        .saveCookie(true)
-                        //单个请求超时
-                        //.writeTimeout(10)
-                        //.readTimeout(10)
-                        //.connectTimeout(10)
-                        //单个请求是否开启log日志
-                        .log(true)
-                        //区分全局变量的请求createSApi(createSingleApi的缩写)
+                        .baseUrl("https://api.douban.com/")
                         .createSApi(ApiService.class)
-                        //自己ApiService中的方法名
-                        .getOctocat()
-                        //内部配置了线程切换相关策略
-                        //如果需要请求loading需要传入自己的loading_dialog
-                        //使用loading的话需要在CommonObserver<XXX>(loading_dialog)中也传去
-                        .compose(Transformer.<Octocat>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Octocat>(loading_dialog) {
+                        .getTop250(5)
+                        .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
+                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
                             @Override
                             protected void getDisposable(Disposable d) {
                                 //方法暴露出来使用者根据需求去取消订阅
@@ -106,20 +84,82 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
 
                             @Override
-                            protected void onSuccess(Octocat octocat) {
-                                String s = octocat.toString();
-                                responseTv.setText(s);
+                            protected void onSuccess(Top250Bean top250Bean) {
+                                StringBuilder sb = new StringBuilder();
+                                for (Top250Bean.SubjectsBean s : top250Bean.getSubjects()) {
+                                    sb.append(s.getTitle() + "\n");
+                                }
+                                responseTv.setText(sb.toString());
                                 //请求成功
-                                showToast(s);
+                                showToast(sb.toString());
+                            }
+                        });
+                break;
+
+            case R.id.single_http:
+
+                RxHttpUtils
+                        //单个请求的实例getSInstance(getSingleInstance的缩写)
+                        .getSInstance()
+                        //单个请求的baseUrl
+                        .baseUrl("https://api.douban.com/")
+                        //单个请求的header
+                        .addHeaders(headerMaps)
+                        //单个请求是否开启缓存
+                        .cache(true)
+                        //单个请求的缓存路径及缓存大小，不设置的话有默认值
+                        .cachePath("cachePath", 1024 * 1024 * 100)
+                        //单个请求的ssl证书认证
+                        //1、设置可访问所有的https网站----(null,null,null)
+                        //2、设置具体的证书----（证书的inputstream,null,null)
+                        //3、双向认证----(证书的inputstream,本地证书的inputstream,本地证书的密码)
+                        .sslSocketFactory(null, null, null)
+                        //单个请求是否持久化cookie
+                        .saveCookie(true)
+                        //单个请求超时
+                        .writeTimeout(10)
+                        .readTimeout(10)
+                        .connectTimeout(10)
+                        //单个请求是否开启log日志
+                        .log(true)
+                        //区分全局变量的请求createSApi(createSingleApi的缩写)
+                        .createSApi(ApiService.class)
+                        //自己ApiService中的方法名
+                        .getTop250(10)
+                        //内部配置了线程切换相关策略
+                        //如果需要请求loading需要传入自己的loading_dialog
+                        //使用loading的话需要在CommonObserver<XXX>(loading_dialog)中也传去
+                        .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
+                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                            @Override
+                            protected void getDisposable(Disposable d) {
+                                //方法暴露出来使用者根据需求去取消订阅
+                                disposables.add(d);
+                            }
+
+                            @Override
+                            protected void onError(String errorMsg) {
+                                //错误处理
+                            }
+
+                            @Override
+                            protected void onSuccess(Top250Bean top250Bean) {
+                                StringBuilder sb = new StringBuilder();
+                                for (Top250Bean.SubjectsBean s : top250Bean.getSubjects()) {
+                                    sb.append(s.getTitle() + "\n");
+                                }
+                                responseTv.setText(sb.toString());
+                                //请求成功
+                                showToast(sb.toString());
                             }
                         });
                 break;
             case R.id.global_http:
                 RxHttpUtils
                         .createApi(ApiService.class)
-                        .getFreeHero()
-                        .compose(Transformer.<FreeHeroBean>switchSchedulers())
-                        .subscribe(new CommonObserver<FreeHeroBean>() {
+                        .getBook()
+                        .compose(Transformer.<BookBean>switchSchedulers(loading_dialog))
+                        .subscribe(new CommonObserver<BookBean>(loading_dialog) {
                             @Override
                             protected void getDisposable(Disposable d) {
                                 disposables.add(d);
@@ -131,8 +171,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
 
                             @Override
-                            protected void onSuccess(FreeHeroBean freeHeroBean) {
-                                String s = freeHeroBean.getData().toString();
+                            protected void onSuccess(BookBean bookBean) {
+                                String s = bookBean.getSummary();
                                 responseTv.setText(s);
                                 showToast(s);
                             }
@@ -144,18 +184,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 RxHttpUtils
                         .createApi(ApiService.class)
-                        .getFreeHero()
-                        .flatMap(new Function<FreeHeroBean, ObservableSource<HeroListBean>>() {
+                        .getBook()
+                        .flatMap(new Function<BookBean, ObservableSource<Top250Bean>>() {
                             @Override
-                            public ObservableSource<HeroListBean> apply(@NonNull FreeHeroBean freeHeroBean) throws Exception {
-                                String limit = freeHeroBean.getData().get(0).getId();
+                            public ObservableSource<Top250Bean> apply(@NonNull BookBean bookBean) throws Exception {
                                 return RxHttpUtils
                                         .createApi(ApiService.class)
-                                        .getHeroList(limit);
+                                        .getTop250(20);
                             }
                         })
-                        .compose(Transformer.<HeroListBean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<HeroListBean>(loading_dialog) {
+                        .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
+                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
                             @Override
                             protected void getDisposable(Disposable d) {
                                 disposables.add(d);
@@ -167,10 +206,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
 
                             @Override
-                            protected void onSuccess(HeroListBean heroListBean) {
-                                String s = heroListBean.getData().toString();
-                                responseTv.setText(s);
-                                showToast(s);
+                            protected void onSuccess(Top250Bean top250Bean) {
+                                StringBuilder sb = new StringBuilder();
+                                sb.append(top250Bean.getTitle() + "\n");
+
+                                for (Top250Bean.SubjectsBean s : top250Bean.getSubjects()) {
+                                    sb.append(s.getTitle() + "\n");
+                                }
+                                responseTv.setText(sb.toString());
+                                //请求成功
+                                showToast(sb.toString());
                             }
                         });
 

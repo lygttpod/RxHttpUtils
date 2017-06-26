@@ -1,10 +1,9 @@
 *.iml
 .gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
 .DS_Store
 /build
+.idea
 /captures
 .externalNativeBuild
 ### Android template
@@ -41,11 +40,6 @@ proguard/
 
 # Android Studio captures folder
 captures/
-
-# Intellij
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/libraries
 
 # Keystore files
 *.jks

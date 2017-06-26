@@ -14,8 +14,6 @@ android {
         versionCode 2
         versionName "2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "CertificatesName", "\"YourSSL.cer\""
-
     }
 
     applicationVariants.all { variant ->
@@ -40,22 +38,22 @@ android {
 
         // 线上环境
         pro {
-            buildConfigField "String", "BASE_URL", "\"http://spenly.com/\""
+            buildConfigField "String", "BASE_URL", "\"https://api.douban.com/\""
         }
 
         // 上线前的预览版本
         releases {
-            buildConfigField "String", "BASE_URL", "\"http://spenly.com/\""
+            buildConfigField "String", "BASE_URL", "\"https://api.douban.com/\""
         }
 
         // 提测后（测试阶段)
         master {
-            buildConfigField "String", "BASE_URL", "\"http://spenly.com/\""
+            buildConfigField "String", "BASE_URL", "\"https://api.douban.com/\""
         }
 
         // 开发阶段
         dev {
-            buildConfigField "String", "BASE_URL", "\"http://spenly.com/\""
+            buildConfigField "String", "BASE_URL", "\"https://api.douban.com/\""
         }
 
     }

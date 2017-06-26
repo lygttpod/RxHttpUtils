@@ -1,10 +1,8 @@
 package com.allen.rxhttputils.api;
 
 
-import com.allen.rxhttputils.bean.FreeHeroBean;
-import com.allen.rxhttputils.bean.HeroListBean;
-import com.allen.rxhttputils.bean.Octocat;
-import com.allen.rxhttputils.bean.ServerListBean;
+import com.allen.rxhttputils.bean.Top250Bean;
+import com.allen.rxhttputils.bean.BookBean;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;
@@ -16,17 +14,12 @@ import retrofit2.http.Query;
 
 public interface ApiService {
 
-    @GET("users/octocat")
-    Observable<Octocat> getOctocat();
-
-    @GET("lol/server")
-    Observable<ServerListBean> getServerList();
+    @GET("v2/book/1220562")
+    Observable<BookBean> getBook();
 
 
-    @GET("lol/free")
-    Observable<FreeHeroBean> getFreeHero();
+    @GET("v2/movie/top250")
+    Observable<Top250Bean> getTop250(@Query("count") int count);
 
-    @GET("lol/heros")
-    Observable<HeroListBean> getHeroList(@Query("limit") String limit);
 
 }

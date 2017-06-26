@@ -2,23 +2,21 @@ package com.allen.library.http;
 
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 
-import com.allen.library.download.DownloadRetrofit;
 import com.allen.library.interceptor.AddCookiesInterceptor;
 import com.allen.library.interceptor.CacheInterceptor;
 import com.allen.library.interceptor.HeaderInterceptor;
 import com.allen.library.interceptor.ReceivedCookiesInterceptor;
-import com.allen.library.upload.UploadRetrofit;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
-import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -48,8 +46,9 @@ public class SingleRxHttp {
     private long writeTimeout;
     private long connectTimeout;
 
-    private String certificateName;
+    private SSLUtils.SSLParams sslParams;
 
+    private OkHttpClient okClient;
 
     public static SingleRxHttp getInstance() {
         if (instance == null) {
@@ -109,8 +108,13 @@ public class SingleRxHttp {
         return this;
     }
 
-    public SingleRxHttp certificates(String certificateName) {
-        this.certificateName = certificateName;
+    public SingleRxHttp sslSocketFactory(InputStream[] certificates, InputStream bksFile, String password) {
+        sslParams = SSLUtils.getSslSocketFactory(certificates, bksFile, password);
+        return this;
+    }
+
+    public SingleRxHttp client(OkHttpClient okClient) {
+        this.okClient = okClient;
         return this;
     }
 
@@ -125,27 +129,6 @@ public class SingleRxHttp {
         return getSingleRetrofitBuilder().build().create(cls);
     }
 
-    /**
-     * 下载文件
-     *
-     * @param fileUrl
-     * @return
-     */
-    public static Observable<ResponseBody> downloadFile(String fileUrl) {
-        return DownloadRetrofit.downloadFile(fileUrl);
-    }
-
-    /**
-     * 上传单张图片
-     *
-     * @param uploadUrl
-     * @param filePath
-     * @return
-     */
-    public static Observable<ResponseBody> uploadImg(String uploadUrl, String filePath) {
-        return UploadRetrofit.uploadImg(uploadUrl, filePath);
-
-    }
 
     /**
      * 单个RetrofitBuilder
@@ -157,7 +140,7 @@ public class SingleRxHttp {
         Retrofit.Builder singleRetrofitBuilder = new Retrofit.Builder();
         singleRetrofitBuilder.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(getSingleOkHttpBuilder().build());
+                .client(okClient == null ? getSingleOkHttpBuilder().build() : okClient);
 
         if (!TextUtils.isEmpty(baseUrl)) {
             singleRetrofitBuilder.baseUrl(baseUrl);
@@ -174,10 +157,7 @@ public class SingleRxHttp {
 
         OkHttpClient.Builder singleOkHttpBuilder = new OkHttpClient.Builder();
 
-        singleOkHttpBuilder.retryOnConnectionFailure(true)
-                .readTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .connectTimeout(10, TimeUnit.SECONDS);
+        singleOkHttpBuilder.retryOnConnectionFailure(true);
 
         singleOkHttpBuilder.addInterceptor(new HeaderInterceptor(headerMaps));
 
@@ -195,7 +175,13 @@ public class SingleRxHttp {
                     .cache(cache);
         }
         if (isShowLog) {
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+                @Override
+                public void log(String message) {
+                    Log.e("RxHttpUtils",message);
+
+                }
+            });
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             singleOkHttpBuilder.addInterceptor(loggingInterceptor);
         }
@@ -206,23 +192,15 @@ public class SingleRxHttp {
                     .addInterceptor(new ReceivedCookiesInterceptor());
         }
 
-        if (readTimeout > 0) {
-            singleOkHttpBuilder.readTimeout(readTimeout, TimeUnit.SECONDS);
-        }
-        if (writeTimeout > 0) {
-            singleOkHttpBuilder.writeTimeout(writeTimeout, TimeUnit.SECONDS);
-        }
-        if (connectTimeout > 0) {
-            singleOkHttpBuilder.connectTimeout(connectTimeout, TimeUnit.SECONDS);
-        }
+        singleOkHttpBuilder.readTimeout(readTimeout > 0 ? readTimeout : 10, TimeUnit.SECONDS);
 
-        if (!TextUtils.isEmpty(certificateName)) {
-            if (!TextUtils.isEmpty(certificateName)) {
-                SSLHelper.SSLParams sslParams = SSLHelper.getSSLParams(certificateName);
-                if (sslParams.sSLSocketFactory != null && sslParams.trustManager != null) {
-                    singleOkHttpBuilder.sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
-                }
-            }
+        singleOkHttpBuilder.writeTimeout(writeTimeout > 0 ? writeTimeout : 10, TimeUnit.SECONDS);
+
+        singleOkHttpBuilder.connectTimeout(connectTimeout > 0 ? connectTimeout : 10, TimeUnit.SECONDS);
+
+
+        if (sslParams != null) {
+            singleOkHttpBuilder.sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
         }
 
 

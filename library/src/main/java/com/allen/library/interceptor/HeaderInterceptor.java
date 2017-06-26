@@ -31,13 +31,14 @@ public class HeaderInterceptor implements Interceptor {
             for (Map.Entry<String, Object> entry : headerMaps.entrySet()) {
                 request.addHeader(entry.getKey(), (String) entry.getValue());
             }
-        } else {
-            request
-                    .addHeader("Content-type", "application/json")
-                    .addHeader("Version", getAppVersion())
-                    .addHeader("uuid", getUUID())
-                    .addHeader("User-Agent", System.getProperty("http.agent"));
         }
+//        else {
+//            request
+//                    .addHeader("Content-type", "application/json")
+//                    .addHeader("Version", getAppVersion())
+//                    .addHeader("uuid", getUUID())
+//                    .addHeader("User-Agent", System.getProperty("http.agent"));
+//        }
 
 
         return chain.proceed(request.build());

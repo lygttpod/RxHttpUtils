@@ -1,11 +1,16 @@
-package com.allen.library.http;
+package com.allen.library;
 
+import com.allen.library.constant.SPKeys;
 import com.allen.library.download.DownloadRetrofit;
+import com.allen.library.http.GlobalRxHttp;
+import com.allen.library.http.SingleRxHttp;
 import com.allen.library.upload.UploadRetrofit;
+import com.allen.library.utils.SPUtils;
 
+
+import java.util.HashSet;
 
 import io.reactivex.Observable;
-
 import okhttp3.ResponseBody;
 
 /**
@@ -14,7 +19,6 @@ import okhttp3.ResponseBody;
  */
 
 public class RxHttpUtils {
-
     private static RxHttpUtils instance;
 
     public static RxHttpUtils getInstance() {
@@ -55,16 +59,6 @@ public class RxHttpUtils {
         return SingleRxHttp.getInstance();
     }
 
-    /**
-     * 使用自己自定义参数创建请求createSingleApi
-     *
-     * @param cls
-     * @param <K>
-     * @return
-     */
-    public <K> K createSApi(Class<K> cls) {
-        return getSInstance().getSingleRetrofitBuilder().build().create(cls);
-    }
 
     /**
      * 下载文件
@@ -87,4 +81,15 @@ public class RxHttpUtils {
         return UploadRetrofit.uploadImg(uploadUrl, filePath);
 
     }
+
+    /**
+     * 获取Cookie
+     *
+     * @return
+     */
+    public static HashSet<String> getCookie() {
+        HashSet<String> preferences = (HashSet<String>) SPUtils.get(SPKeys.COOKIE, new HashSet<String>());
+        return preferences;
+    }
+
 }
