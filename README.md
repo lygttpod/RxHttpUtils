@@ -1,3 +1,6 @@
+[![](https://jitpack.io/v/lygttpod/RxHttpUtils.svg)](https://jitpack.io/#lygttpod/RxHttpUtils)
+
+
 # [**Demo下载地址**](https://fir.im/dzm1) 或者扫码下载demo
 
 <div  align="center">   
