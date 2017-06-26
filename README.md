@@ -1,12 +1,5 @@
 [![](https://jitpack.io/v/lygttpod/RxHttpUtils.svg)](https://jitpack.io/#lygttpod/RxHttpUtils)
 
-
-# [**Demo下载地址**](https://fir.im/dzm1) 或者扫码下载demo
-
-<div  align="center">   
-<img src="https://github.com/lygttpod/RxHttpUtils/blob/2.x/rxhttputils.png" width = "480" height = "480" alt="Demo下载地址" align=center /></div>
-</div>
-
 # 重磅推出 RxHttpUtils 2.x 版本
 ## RxJava+Retrofit封装，基于RxJava2和Retrofit2重构，便捷使用
 
@@ -375,6 +368,12 @@ public class BaseResponse {
 
 如果觉得对你有用的话，点一下右上的星星赞一下吧!
 
+
+# [**Demo下载地址**](https://fir.im/dzm1) 或者扫码下载demo
+
+<div  align="center">   
+<img src="https://github.com/lygttpod/RxHttpUtils/blob/2.x/rxhttputils.png" width = "480" height = "480" alt="Demo下载地址" align=center /></div>
+</div>
 
 # License
          Copyright 2016 Allen
