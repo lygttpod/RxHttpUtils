@@ -9,21 +9,22 @@
 ### 添加Gradle依赖
 
 先在项目根目录的 build.gradle 的 repositories 添加:
-
+```
      allprojects {
          repositories {
             ...
             maven { url "https://jitpack.io" }
         }
     }
-    
+```
  然后在dependencies添加:
  
+ ```
         dependencies {
         ...
         compile 'com.github.lygttpod:RxHttpUtils:2.0.1'
         }
-
+```
 
 # 使用说明
 
