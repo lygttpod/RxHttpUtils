@@ -1,8 +1,4 @@
-# [**Demo下载地址**](https://fir.im/dzm1) 或者扫码下载demo
-
-<div  align="center">   
-<img src="https://github.com/lygttpod/RxHttpUtils/blob/2.x/rxhttputils.png" width = "480" height = "480" alt="Demo下载地址" align=center /></div>
-</div>
+[![](https://jitpack.io/v/lygttpod/RxHttpUtils.svg)](https://jitpack.io/#lygttpod/RxHttpUtils)
 
 # 重磅推出 RxHttpUtils 2.x 版本
 ## RxJava+Retrofit封装，基于RxJava2和Retrofit2重构，便捷使用
@@ -62,11 +58,13 @@ public class MyApplication extends BaseRxHttpApplication {
                 .setHeaders(headerMaps)
                 //全局持久话cookie,保存本地每次都会携带在header中
                 .setCookie(false)
-                //全局ssl证书认证
-                //1、设置可访问所有的https网站----(null,null,null)
-                //2、设置具体的证书----（证书的inputstream,null,null)
-                //3、双向认证----(证书的inputstream,本地证书的inputstream,本地证书的密码)
-                .setSslSocketFactory(null, null, null)
+                //全局ssl证书认证，支持三种方式
+                //1、信任所有证书,不安全有风险
+                .setSslSocketFactory()
+                //2、使用预埋证书，校验服务端证书（自签名证书）
+                //.setSslSocketFactory(getAssets().open("your.cer"))
+                //3、使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
+                //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
                 //全局超时配置
                 .setReadTimeout(10)
                 //全局超时配置
@@ -191,7 +189,7 @@ public class BaseResponse {
                         .addHeaders(headerMaps)
                         .cache(true)
                         .cachePath("cachePath", 1024 * 1024 * 100)
-                        .sslSocketFactory(null, null, null)
+                        .sslSocketFactory()
                         .saveCookie(true)
                         .writeTimeout(10)
                         .readTimeout(10)
@@ -295,11 +293,13 @@ public class BaseResponse {
                 .setHeaders(headerMaps)
                 //全局持久话cookie,保存本地每次都会携带在header中
                 .setCookie(false)
-                //全局ssl证书认证
-                //1、设置可访问所有的https网站----(null,null,null)
-                //2、设置具体的证书----（证书的inputstream,null,null)
-                //3、双向认证----(证书的inputstream,本地证书的inputstream,本地证书的密码)
-                .setSslSocketFactory(null, null, null)
+                //全局ssl证书认证，支持三种方式
+                //信任所有证书,不安全有风险
+                .setSslSocketFactory()
+                //使用预埋证书，校验服务端证书（自签名证书）
+                //.setSslSocketFactory(getAssets().open("your.cer"))
+                //使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
+                //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
                 //全局超时配置
                 .setReadTimeout(10)
                 //全局超时配置
@@ -321,11 +321,13 @@ public class BaseResponse {
                         .cache(true)
                         //单个请求的缓存路径及缓存大小，不设置的话有默认值
                         .cachePath("cachePath", 1024 * 1024 * 100)
-                        //单个请求的ssl证书认证
-                        //1、设置可访问所有的https网站----(null,null,null)
-                        //2、设置具体的证书----（证书的inputstream,null,null)
-                        //3、双向认证----(证书的inputstream,本地证书的inputstream,本地证书的密码)
-                        .sslSocketFactory(null, null, null)
+                        //单个请求的ssl证书认证，支持三种方式
+                        //1、信任所有证书,不安全有风险
+                        .setSslSocketFactory()
+                        //2、使用预埋证书，校验服务端证书（自签名证书）
+                        //.setSslSocketFactory(getAssets().open("your.cer"))
+                        //3、使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
+                        //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
                         //单个请求是否持久化cookie
                         .saveCookie(true)
                         //单个请求超时
@@ -373,7 +375,13 @@ public class BaseResponse {
 如果觉得对你有用的话，点一下右上的星星赞一下吧!
 
 
-#License
+# [**Demo下载地址**](https://fir.im/dzm1) 或者扫码下载demo
+
+<div  align="center">   
+<img src="https://github.com/lygttpod/RxHttpUtils/blob/2.x/rxhttputils.png" width = "480" height = "480" alt="Demo下载地址" align=center /></div>
+</div>
+
+# License
          Copyright 2016 Allen
 
         Licensed under the Apache License, Version 2.0 (the "License");
