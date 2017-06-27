@@ -108,8 +108,37 @@ public class SingleRxHttp {
         return this;
     }
 
-    public SingleRxHttp sslSocketFactory(InputStream[] certificates, InputStream bksFile, String password) {
-        sslParams = SSLUtils.getSslSocketFactory(certificates, bksFile, password);
+    /**
+     * 信任所有证书,不安全有风险
+     *
+     * @return
+     */
+    public SingleRxHttp sslSocketFactory() {
+        sslParams = SSLUtils.getSslSocketFactory();
+        return this;
+    }
+
+    /**
+     * 使用预埋证书，校验服务端证书（自签名证书）
+     *
+     * @param certificates
+     * @return
+     */
+    public SingleRxHttp sslSocketFactory(InputStream... certificates) {
+        sslParams = SSLUtils.getSslSocketFactory(certificates);
+        return this;
+    }
+
+    /**
+     * 使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
+     *
+     * @param bksFile
+     * @param password
+     * @param certificates
+     * @return
+     */
+    public SingleRxHttp sslSocketFactory(InputStream bksFile, String password, InputStream... certificates) {
+        sslParams = SSLUtils.getSslSocketFactory(bksFile, password, certificates);
         return this;
     }
 
@@ -178,7 +207,7 @@ public class SingleRxHttp {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
                 @Override
                 public void log(String message) {
-                    Log.e("RxHttpUtils",message);
+                    Log.e("RxHttpUtils", message);
 
                 }
             });
@@ -198,11 +227,9 @@ public class SingleRxHttp {
 
         singleOkHttpBuilder.connectTimeout(connectTimeout > 0 ? connectTimeout : 10, TimeUnit.SECONDS);
 
-
         if (sslParams != null) {
             singleOkHttpBuilder.sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
         }
-
 
         return singleOkHttpBuilder;
     }

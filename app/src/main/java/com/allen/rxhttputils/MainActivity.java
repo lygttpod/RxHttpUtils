@@ -109,11 +109,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .cache(true)
                         //单个请求的缓存路径及缓存大小，不设置的话有默认值
                         .cachePath("cachePath", 1024 * 1024 * 100)
-                        //单个请求的ssl证书认证
-                        //1、设置可访问所有的https网站----(null,null,null)
-                        //2、设置具体的证书----（证书的inputstream,null,null)
-                        //3、双向认证----(证书的inputstream,本地证书的inputstream,本地证书的密码)
-                        .sslSocketFactory(null, null, null)
+                        //单个请求的ssl证书认证,支持三种认证方式
+                        //信任所有证书,不安全有风险
+                        .sslSocketFactory()
+                        //使用预埋证书，校验服务端证书（自签名证书）
+                        //.setSslSocketFactory(getAssets().open("your.cer"))
+                        //使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
+                        //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
                         //单个请求是否持久化cookie
                         .saveCookie(true)
                         //单个请求超时
@@ -222,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.download_http:
                 String url = "https://t.alipayobjects.com/L1/71/100/and/alipay_wap_main.apk";
-                String fileName = "alipay.apk";
+                final String fileName = "alipay.apk";
                 RxHttpUtils
                         .downloadFile(url)
                         .subscribe(new DownloadObserver(fileName) {
@@ -242,6 +244,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 if (done) {
                                     download_http.setEnabled(true);
                                     download_http.setText("文件下载");
+                                    responseTv.setText("下载文件路径："+filePath);
+
                                 }
 
                             }

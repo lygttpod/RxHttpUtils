@@ -182,18 +182,38 @@ public class GlobalRxHttp {
     }
 
     /**
-     * 对https的支持，三种方式
-     * 1、设置可访问所有的https网站----(null,null,null)
-     * 2、设置具体的证书----（证书的inputstream,null,null)
-     * 3、双向认证----(证书的inputstream,本地证书的inputstream,本地证书的密码)
+     * 信任所有证书,不安全有风险
      *
-     * @param certificates
-     * @param bksFile
-     * @param password
      * @return
      */
-    public GlobalRxHttp setSslSocketFactory(InputStream[] certificates, InputStream bksFile, String password) {
-        SSLUtils.SSLParams sslParams = SSLUtils.getSslSocketFactory(certificates, bksFile, password);
+    public GlobalRxHttp setSslSocketFactory() {
+        SSLUtils.SSLParams sslParams = SSLUtils.getSslSocketFactory();
+        getGlobalOkHttpBuilder().sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
+        return this;
+    }
+
+    /**
+     * 使用预埋证书，校验服务端证书（自签名证书）
+     *
+     * @param certificates
+     * @return
+     */
+    public GlobalRxHttp setSslSocketFactory(InputStream... certificates) {
+        SSLUtils.SSLParams sslParams = SSLUtils.getSslSocketFactory(certificates);
+        getGlobalOkHttpBuilder().sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
+        return this;
+    }
+
+    /**
+     * 使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
+     *
+     * @param bksFile
+     * @param password
+     * @param certificates
+     * @return
+     */
+    public GlobalRxHttp setSslSocketFactory(InputStream bksFile, String password, InputStream... certificates) {
+        SSLUtils.SSLParams sslParams = SSLUtils.getSslSocketFactory(bksFile, password, certificates);
         getGlobalOkHttpBuilder().sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
         return this;
     }

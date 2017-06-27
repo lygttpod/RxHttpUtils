@@ -50,7 +50,7 @@ public abstract class BaseObserver<T extends BaseResponse> implements Observer<T
             setError(ApiException.errorMsg_UnknownHostException);
         } else {
 
-            String error = handleError(e);
+            String error = e.getMessage();
             showToast(error);
             doOnError(error);
         }
