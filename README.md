@@ -21,7 +21,7 @@
  
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.0.0'
+        compile 'com.github.lygttpod:RxHttpUtils:2.0.1'
         }
 
 
@@ -361,6 +361,9 @@ public class BaseResponse {
 # 后面会陆续完成文件上传的封装，敬请期待...
 
 # 更新日志
+
+### V2.0.1
+* 添加对https的支持
 
 ### V2.0.0
 * 基于RxJava2和Retrofit2重构
