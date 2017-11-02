@@ -14,15 +14,17 @@ import io.reactivex.schedulers.Schedulers;
 
 
 /**
- * Created by allen on 2016/12/20.
+ * Created by Allen on 2016/12/20.
  * <p>
- * 控制操作线程的辅助类
+ *
+ * @author Allen
+ *         控制操作线程的辅助类
  */
 
 public class Transformer {
 
     /**
-     * 带参数  显示loading对话框
+     * 无参数
      *
      * @param <T> 泛型
      * @return 返回Observable
@@ -46,6 +48,13 @@ public class Transformer {
         };
     }
 
+    /**
+     * 带参数  显示loading对话框
+     *
+     * @param dialog loading
+     * @param <T>    泛型
+     * @return 返回Observable
+     */
     public static <T> ObservableTransformer<T, T> switchSchedulers(final Dialog dialog) {
         return new ObservableTransformer<T, T>() {
             @Override

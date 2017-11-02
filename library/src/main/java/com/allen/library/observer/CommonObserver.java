@@ -1,20 +1,23 @@
-package com.allen.library.http;
+package com.allen.library.observer;
 
 
 import android.app.Dialog;
 
-
+import com.allen.library.RxHttpUtils;
 import com.allen.library.base.BaseObserver;
-import com.allen.library.base.BaseResponse;
+import com.allen.library.utils.ToastUtils;
 
 import io.reactivex.disposables.Disposable;
 
 /**
  * Created by Allen on 2017/5/3.
- * 通用的Observer
+ *
+ * @author Allen
+ *         通用的Observer
+ *         用户可以根据自己需求自定义自己的类继承BaseObserver<T>即可
  */
 
-public abstract class CommonObserver<T extends BaseResponse> extends BaseObserver<T> {
+public abstract class CommonObserver<T> extends BaseObserver<T> {
 
 
     private Dialog mProgressDialog;
@@ -25,11 +28,6 @@ public abstract class CommonObserver<T extends BaseResponse> extends BaseObserve
     public CommonObserver(Dialog progressDialog) {
         mProgressDialog = progressDialog;
     }
-
-    /**
-     * 获取disposable 在onDestroy方法中取消订阅disposable.dispose()
-     */
-    protected abstract void getDisposable(Disposable d);
 
     /**
      * 失败回调
@@ -48,7 +46,7 @@ public abstract class CommonObserver<T extends BaseResponse> extends BaseObserve
 
     @Override
     public void doOnSubscribe(Disposable d) {
-        getDisposable(d);
+        RxHttpUtils.addDisposable(d);
     }
 
     @Override
@@ -56,6 +54,7 @@ public abstract class CommonObserver<T extends BaseResponse> extends BaseObserve
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
+        ToastUtils.showToast(errorMsg);
         onError(errorMsg);
     }
 

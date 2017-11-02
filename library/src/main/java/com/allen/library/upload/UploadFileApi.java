@@ -11,11 +11,20 @@ import retrofit2.http.Url;
 /**
  * Created by allen on 2017/6/15.
  * <p>
- * 文件上传
+ *
+ * @author Allen
+ *         文件上传
  */
 
 public interface UploadFileApi {
 
+    /**
+     * 上传
+     *
+     * @param uploadUrl 地址
+     * @param file      文件
+     * @return ResponseBody
+     */
     @Multipart
     @POST
     Observable<ResponseBody> uploadImg(@Url String uploadUrl,

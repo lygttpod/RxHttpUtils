@@ -11,20 +11,24 @@ import com.allen.library.interceptor.ReceivedCookiesInterceptor;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.CallAdapter;
+import retrofit2.Converter;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by allen on 2017/6/22.
- * 网络请求-----可以对每个请求单独配置参数
+ *
+ * @author Allen
+ *         网络请求-----可以对每个请求单独配置参数
  */
 
 public class SingleRxHttp {
@@ -50,20 +54,41 @@ public class SingleRxHttp {
 
     private OkHttpClient okClient;
 
-    public static SingleRxHttp getInstance() {
-        if (instance == null) {
-            synchronized (SingleRxHttp.class) {
-                if (instance == null) {
-                    instance = new SingleRxHttp();
-                }
-            }
+    private List<Converter.Factory> converterFactories = new ArrayList<>();
+    private List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
 
-        }
+    /**
+     * 不使用单利模式是因为单个请求的参数配置是单次有效的
+     *
+     * @return SingleRxHttp
+     */
+    public static SingleRxHttp getInstance() {
+        instance = new SingleRxHttp();
         return instance;
     }
 
     public SingleRxHttp baseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
+        return this;
+    }
+
+    /**
+     * 局部设置Converter.Factory,默认GsonConverterFactory.create()
+     */
+    public SingleRxHttp addConverterFactory(Converter.Factory factory) {
+        if (factory != null) {
+            converterFactories.add(factory);
+        }
+        return this;
+    }
+
+    /**
+     * 局部设置CallAdapter.Factory,默认RxJavaCallAdapterFactory.create()
+     */
+    public SingleRxHttp addCallAdapterFactory(CallAdapter.Factory factory) {
+        if (factory != null) {
+            adapterFactories.add(factory);
+        }
         return this;
     }
 
@@ -167,13 +192,41 @@ public class SingleRxHttp {
     public Retrofit.Builder getSingleRetrofitBuilder() {
 
         Retrofit.Builder singleRetrofitBuilder = new Retrofit.Builder();
-        singleRetrofitBuilder.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(okClient == null ? getSingleOkHttpBuilder().build() : okClient);
 
-        if (!TextUtils.isEmpty(baseUrl)) {
+        if (converterFactories.isEmpty()) {
+            //获取全局的对象重新设置
+            List<Converter.Factory> listConverterFactory = RetrofitClient.getInstance().getRetrofit().converterFactories();
+            for (Converter.Factory factory : listConverterFactory) {
+                singleRetrofitBuilder.addConverterFactory(factory);
+            }
+        } else {
+            for (Converter.Factory converterFactory : converterFactories) {
+                singleRetrofitBuilder.addConverterFactory(converterFactory);
+            }
+        }
+
+        if (adapterFactories.isEmpty()) {
+            //获取全局的对象重新设置
+            List<CallAdapter.Factory> listAdapterFactory = RetrofitClient.getInstance().getRetrofit().callAdapterFactories();
+            for (CallAdapter.Factory factory : listAdapterFactory) {
+                singleRetrofitBuilder.addCallAdapterFactory(factory);
+            }
+
+        } else {
+            for (CallAdapter.Factory adapterFactory : adapterFactories) {
+                singleRetrofitBuilder.addCallAdapterFactory(adapterFactory);
+            }
+        }
+
+
+        if (TextUtils.isEmpty(baseUrl)) {
+            singleRetrofitBuilder.baseUrl(RetrofitClient.getInstance().getRetrofit().baseUrl());
+        } else {
             singleRetrofitBuilder.baseUrl(baseUrl);
         }
+
+        singleRetrofitBuilder.client(okClient == null ? getSingleOkHttpBuilder().build() : okClient);
+
         return singleRetrofitBuilder;
     }
 
@@ -182,7 +235,7 @@ public class SingleRxHttp {
      *
      * @return
      */
-    public OkHttpClient.Builder getSingleOkHttpBuilder() {
+    private OkHttpClient.Builder getSingleOkHttpBuilder() {
 
         OkHttpClient.Builder singleOkHttpBuilder = new OkHttpClient.Builder();
 
@@ -208,7 +261,6 @@ public class SingleRxHttp {
                 @Override
                 public void log(String message) {
                     Log.e("RxHttpUtils", message);
-
                 }
             });
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);

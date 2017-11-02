@@ -1,14 +1,12 @@
 package com.allen.rxhttputils.bean;
 
-import com.allen.library.base.BaseResponse;
-
 import java.util.List;
 
 /**
  * Created by allen on 2017/6/23.
  */
 
-public class Top250Bean extends BaseResponse {
+public class Top250Bean  {
 
 
     /**

@@ -6,9 +6,11 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by Allen on 2017/5/3.
- * <p>
- * RetrofitClient工具类
+ * Created on 2017/5/3.
+ *
+ * @author Allen
+ *         <p>
+ *         RetrofitClient工具类
  */
 
 public class RetrofitClient {
@@ -48,7 +50,7 @@ public class RetrofitClient {
     }
 
     public Retrofit getRetrofit() {
-        return mRetrofitBuilder.client(mOkHttpBuilder.build()).build();
+        return mRetrofitBuilder.build();
     }
 
 }

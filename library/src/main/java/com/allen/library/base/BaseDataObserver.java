@@ -1,39 +1,37 @@
 package com.allen.library.base;
 
+import com.allen.library.bean.BaseData;
 import com.allen.library.exception.ApiException;
-import com.allen.library.interfaces.ISubscriber;
+import com.allen.library.interfaces.IDataSubscriber;
 
 import io.reactivex.Observer;
-import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 
-
 /**
- * Created by Allen on 2017/5/3.
+ * Created by Allen on 2017/10/27.
  *
  * @author Allen
  *         <p>
- *         基类BaseObserver
+ *         基类BaseObserver使用BaseData
  */
 
-public abstract class BaseObserver<T> implements Observer<T>, ISubscriber<T> {
+public abstract class BaseDataObserver<T> implements Observer<BaseData<T>>, IDataSubscriber<T> {
 
     @Override
-    public void onSubscribe(@NonNull Disposable d) {
+    public void onSubscribe(Disposable d) {
         doOnSubscribe(d);
     }
 
     @Override
-    public void onNext(@NonNull T t) {
-        doOnNext(t);
+    public void onNext(BaseData<T> baseData) {
+        doOnNext(baseData);
     }
 
     @Override
-    public void onError(@NonNull Throwable e) {
+    public void onError(Throwable e) {
         String error = ApiException.handleException(e).getMessage();
         setError(error);
     }
-
 
     @Override
     public void onComplete() {

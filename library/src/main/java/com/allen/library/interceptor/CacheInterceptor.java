@@ -1,11 +1,12 @@
 package com.allen.library.interceptor;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 
-import com.allen.library.base.BaseRxHttpApplication;
+import com.allen.library.RxHttpUtils;
 
 import java.io.IOException;
 
@@ -15,9 +16,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Created by allen on 2017/1/3.
+ * Created by Allen on 2017/1/3.
  * <p>
- * 网络缓存
+ *
+ * @author Allen
+ *         网络缓存
  */
 
 public class CacheInterceptor implements Interceptor {
@@ -30,7 +33,6 @@ public class CacheInterceptor implements Interceptor {
                     .cacheControl(CacheControl.FORCE_CACHE)
                     .build();
         }
-
         Response originalResponse = chain.proceed(request);
         if (isNetworkConnected()) {
             //有网的时候读接口上的@Headers里的配置
@@ -53,10 +55,10 @@ public class CacheInterceptor implements Interceptor {
      * @return 返回值
      */
     public static boolean isNetworkConnected() {
-        Context context = BaseRxHttpApplication.getContext();
+        Context context = RxHttpUtils.getContext();
         if (context != null) {
             ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            @SuppressLint("MissingPermission") NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
             if (mNetworkInfo != null) {
                 return mNetworkInfo.isAvailable();
             }

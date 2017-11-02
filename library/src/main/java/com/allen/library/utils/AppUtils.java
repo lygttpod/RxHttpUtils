@@ -1,5 +1,6 @@
 package com.allen.library.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -7,7 +8,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 
-import com.allen.library.base.BaseRxHttpApplication;
+import com.allen.library.RxHttpUtils;
 
 import java.util.UUID;
 
@@ -28,8 +29,8 @@ public class AppUtils {
         PackageInfo pi;
         String versionNum;
         try {
-            PackageManager pm = BaseRxHttpApplication.getContext().getPackageManager();
-            pi = pm.getPackageInfo(BaseRxHttpApplication.getContext().getPackageName(), PackageManager.GET_CONFIGURATIONS);
+            PackageManager pm = RxHttpUtils.getContext().getPackageManager();
+            pi = pm.getPackageInfo(RxHttpUtils.getContext().getPackageName(), PackageManager.GET_CONFIGURATIONS);
             versionNum = pi.versionName;
         } catch (Exception e) {
             versionNum = "0";
@@ -47,7 +48,7 @@ public class AppUtils {
      */
     public static String getUUID() {
 
-        Context context = BaseRxHttpApplication.getContext();
+        Context context = RxHttpUtils.getContext();
 
         String uuid = (String) SPUtils.get(context, "PHONE_UUID", "");
 
@@ -56,10 +57,10 @@ public class AppUtils {
             try {
                 TelephonyManager telephonyManager = (TelephonyManager) context
                         .getSystemService(Context.TELEPHONY_SERVICE);
-                String tmDevice = telephonyManager.getDeviceId();
-                String tmSerial = telephonyManager.getSimSerialNumber();
+                @SuppressLint({"MissingPermission", "HardwareIds"}) String tmDevice = telephonyManager.getDeviceId();
+                @SuppressLint({"MissingPermission", "HardwareIds"}) String tmSerial = telephonyManager.getSimSerialNumber();
 
-                String androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+                @SuppressLint("HardwareIds") String androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
                 UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
                 String uniqueId = deviceUuid.toString();
                 uuid = uniqueId;

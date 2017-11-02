@@ -1,13 +1,14 @@
-package com.allen.library.base;
+package com.allen.library.bean;
 
 /**
- * Created by allen on 2017/6/23.
- * <p>
- * 请求结果基类   所有请求结果继承此类
+ * Created by Allen on 2017/10/23.
+ *
+ * @author Allen
+ *         <p>
+ *         返回数据基类
  */
 
-public class BaseResponse {
-
+public class BaseData<T> {
     /**
      * 错误码
      */
@@ -16,6 +17,11 @@ public class BaseResponse {
      * 错误描述
      */
     private String msg;
+
+    /**
+     * 数据
+     */
+    private T data;
 
     public int getCode() {
         return code;
@@ -33,12 +39,20 @@ public class BaseResponse {
         this.msg = msg;
     }
 
-    @Override
-    public String toString() {
-        return "BaseResponse{" +
-                "code=" + code +
-                ", msg='" + msg + '\'' +
-                '}';
+    public T getData() {
+        return data;
     }
 
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "BaseData{" +
+                "code=" + code +
+                ", msg='" + msg + '\'' +
+                ", data=" + data +
+                '}';
+    }
 }

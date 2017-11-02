@@ -3,7 +3,9 @@ package com.allen.library.constant;
 /**
  * Created by allen on 2017/5/11.
  * <p>
- * 存放SharedPreferences文件的所有Key值
+ *
+ * @author Allen
+ *         存放SharedPreferences文件的所有Key值
  */
 
 public interface SPKeys {

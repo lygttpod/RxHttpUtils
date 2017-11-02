@@ -8,10 +8,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.allen.library.download.DownloadObserver;
-import com.allen.library.http.CommonObserver;
 import com.allen.library.RxHttpUtils;
+import com.allen.library.download.DownloadObserver;
 import com.allen.library.interceptor.Transformer;
+import com.allen.library.observer.CommonObserver;
+import com.allen.library.observer.StringObserver;
 import com.allen.rxhttputils.api.ApiService;
 import com.allen.rxhttputils.bean.BookBean;
 import com.allen.rxhttputils.bean.Top250Bean;
@@ -25,10 +26,14 @@ import io.reactivex.ObservableSource;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
+
+import static com.allen.library.utils.ToastUtils.showToast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button single_http_default, single_http, global_http, multiple_http, download_http, upload_http;
+    private Button single_http_default, single_http, single_string_http, global_http, multiple_http, download_http, upload_http;
     private Dialog loading_dialog;
     private TextView responseTv;
 
@@ -44,6 +49,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         single_http_default.setOnClickListener(this);
         single_http = (Button) findViewById(R.id.single_http);
         single_http.setOnClickListener(this);
+        single_string_http = (Button) findViewById(R.id.single_string_http);
+        single_string_http.setOnClickListener(this);
         global_http = (Button) findViewById(R.id.global_http);
         global_http.setOnClickListener(this);
         multiple_http = (Button) findViewById(R.id.multiple_http);
@@ -52,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         download_http.setOnClickListener(this);
         upload_http = (Button) findViewById(R.id.upload_http);
         upload_http.setOnClickListener(this);
+
     }
 
     @Override
@@ -73,14 +81,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
                             @Override
-                            protected void getDisposable(Disposable d) {
-                                //方法暴露出来使用者根据需求去取消订阅
-                                disposables.add(d);
-                            }
-
-                            @Override
                             protected void onError(String errorMsg) {
-                                //错误处理
+
                             }
 
                             @Override
@@ -105,6 +107,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .baseUrl("https://api.douban.com/")
                         //单个请求的header
                         .addHeaders(headerMaps)
+                        //根据需求自行配置
+                        .addCallAdapterFactory(null)
+                        .addConverterFactory(null)
                         //单个请求是否开启缓存
                         .cache(true)
                         //单个请求的缓存路径及缓存大小，不设置的话有默认值
@@ -134,12 +139,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
                             @Override
-                            protected void getDisposable(Disposable d) {
-                                //方法暴露出来使用者根据需求去取消订阅
-                                disposables.add(d);
-                            }
-
-                            @Override
                             protected void onError(String errorMsg) {
                                 //错误处理
                             }
@@ -156,16 +155,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         });
                 break;
+            case R.id.single_string_http:
+                RxHttpUtils.getSInstance()
+                        .baseUrl("https://api.douban.com/")
+                        .addConverterFactory(ScalarsConverterFactory.create())
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .createSApi(ApiService.class)
+                        .getBookString()
+                        .compose(Transformer.<String>switchSchedulers(loading_dialog))
+                        .subscribe(new StringObserver(loading_dialog) {
+                            @Override
+                            protected void onError(String errorMsg) {
+
+                            }
+
+                            @Override
+                            protected void onSuccess(String data) {
+                                showToast(data);
+                                responseTv.setText(data);
+                            }
+                        });
+
+                break;
             case R.id.global_http:
                 RxHttpUtils
                         .createApi(ApiService.class)
                         .getBook()
                         .compose(Transformer.<BookBean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<BookBean>(loading_dialog) {
-                            @Override
-                            protected void getDisposable(Disposable d) {
-                                disposables.add(d);
-                            }
 
                             @Override
                             protected void onError(String errorMsg) {
@@ -179,6 +196,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 showToast(s);
                             }
                         });
+
+//                Map<String, Object> map = new HashMap<>();
+//                map.put("targetId", "925644716425547776");
+//                map.put("buyAmount", 1000);
+//                map.put("principalCouponId", 63);
+//
+//                RxHttpUtils.getSInstance()
+//                        .baseUrl("https://master-scbank-gateway-app.51doro.com/api/")
+//                        .createSApi(ApiService.class)
+//                        .getTradeExpected(map)
+//                        .compose(Transformer.<BaseData<DataBean>>switchSchedulers())
+//                        .subscribe(new DataObserver<DataBean>() {
+//                            @Override
+//                            protected void onError(String errorMsg) {
+//
+//                            }
+//
+//                            @Override
+//                            protected void onSuccess(DataBean data) {
+//                                responseTv.setText(data.getCanUsePrincipalCount() + "");
+//                                showToast(data.getCanUseRateCount() + "");
+//                            }
+//                        });
+
 
                 break;
 
@@ -197,11 +238,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         })
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
-                            @Override
-                            protected void getDisposable(Disposable d) {
-                                disposables.add(d);
-                            }
-
                             @Override
                             protected void onError(String errorMsg) {
 
@@ -244,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 if (done) {
                                     download_http.setEnabled(true);
                                     download_http.setText("文件下载");
-                                    responseTv.setText("下载文件路径："+filePath);
+                                    responseTv.setText("下载文件路径：" + filePath);
 
                                 }
 
@@ -264,6 +300,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                        });
 
                 break;
+            default:
         }
     }
 
@@ -271,11 +308,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (disposables != null) {
-            for (Disposable disposable : disposables) {
-                disposable.dispose();
-            }
-            disposables.clear();
-        }
+        RxHttpUtils.cancelAllRequest();
     }
 }

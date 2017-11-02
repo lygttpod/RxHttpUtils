@@ -13,7 +13,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Created by allen on 2017/6/14.
  * <p>
- * 为下载单独建一个retrofit
+ *
+ * @author Allen
+ *         为下载单独建一个retrofit
  */
 
 public class DownloadRetrofit {

@@ -1,7 +1,5 @@
 package com.allen.rxhttputils.bean;
 
-import com.allen.library.base.BaseResponse;
-
 import java.util.List;
 
 /**
@@ -10,7 +8,7 @@ import java.util.List;
  * 服务器列表
  */
 
-public class BookBean extends BaseResponse{
+public class BookBean {
 
     /**
      * rating : {"max":10,"numRaters":364,"average":"7.1","min":0}

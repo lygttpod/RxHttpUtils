@@ -13,7 +13,9 @@ import okhttp3.ResponseBody;
 /**
  * Created by allen on 2017/6/13.
  * <p>
- * 文件下载
+ *
+ * @author Allen
+ *         文件下载
  */
 
 public abstract class DownloadObserver extends BaseDownloadObserver {
@@ -24,22 +26,34 @@ public abstract class DownloadObserver extends BaseDownloadObserver {
         this.fileName = fileName;
     }
 
+
     /**
      * 获取disposable 在onDestroy方法中取消订阅disposable.dispose()
+     *
+     * @param d Disposable
      */
     protected abstract void getDisposable(Disposable d);
 
     /**
      * 失败回调
      *
-     * @param errorMsg
+     * @param errorMsg errorMsg
      */
     protected abstract void onError(String errorMsg);
 
     /**
      * 成功回调
      *
-     * @param filePath
+     * @param filePath filePath
+     */
+    /**
+     * 成功回调
+     *
+     * @param bytesRead     已经下载文件的大小
+     * @param contentLength 文件的大小
+     * @param progress      当前进度
+     * @param done          是否下载完成
+     * @param filePath      文件路径
      */
     protected abstract void onSuccess(long bytesRead, long contentLength, float progress, boolean done, String filePath);
 

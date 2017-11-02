@@ -2,7 +2,7 @@ package com.allen.library.download;
 
 import android.widget.Toast;
 
-import com.allen.library.base.BaseRxHttpApplication;
+import com.allen.library.RxHttpUtils;
 import com.allen.library.exception.ApiException;
 
 import java.net.ConnectException;
@@ -13,34 +13,28 @@ import io.reactivex.Observer;
 import io.reactivex.annotations.NonNull;
 import okhttp3.ResponseBody;
 
+import static com.allen.library.utils.ToastUtils.showToast;
+
 /**
  * Created by allen on 2017/6/13.
  *
+ * @author Allen
  */
 
 public abstract class BaseDownloadObserver implements Observer<ResponseBody> {
 
-    private Toast mToast;
-
     /**
      * 失败回调
      *
-     * @param errorMsg
+     * @param errorMsg 错误信息
      */
     protected abstract void doOnError(String errorMsg);
 
 
     @Override
     public void onError(@NonNull Throwable e) {
-        if (e instanceof SocketTimeoutException) {
-            setError(ApiException.errorMsg_SocketTimeoutException);
-        } else if (e instanceof ConnectException) {
-            setError(ApiException.errorMsg_ConnectException);
-        } else if (e instanceof UnknownHostException) {
-            setError(ApiException.errorMsg_UnknownHostException);
-        } else {
-            doOnError(e.getMessage().toString());
-        }
+        String error = ApiException.handleException(e).getMessage();
+        setError(error);
     }
 
     private void setError(String errorMsg) {
@@ -48,17 +42,4 @@ public abstract class BaseDownloadObserver implements Observer<ResponseBody> {
         doOnError(errorMsg);
     }
 
-    /**
-     * Toast提示
-     *
-     * @param msg 提示内容
-     */
-    protected void showToast(String msg) {
-        if (mToast == null) {
-            mToast = Toast.makeText(BaseRxHttpApplication.getContext(), msg, Toast.LENGTH_SHORT);
-        } else {
-            mToast.setText(msg);
-        }
-        mToast.show();
-    }
 }

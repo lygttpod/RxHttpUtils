@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 
-import com.allen.library.base.BaseRxHttpApplication;
+import com.allen.library.RxHttpUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -152,7 +152,7 @@ public class SPUtils {
      * @return
      */
     private static SharedPreferences obtainPref() {
-        Context context = BaseRxHttpApplication.getContext();
+        Context context = RxHttpUtils.getContext();
         SharedPreferences pref = context.getSharedPreferences(FILE_NAME,
                 Context.MODE_PRIVATE);
         return pref;

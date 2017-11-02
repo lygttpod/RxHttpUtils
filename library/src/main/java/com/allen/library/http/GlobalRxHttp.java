@@ -22,7 +22,9 @@ import retrofit2.Retrofit;
 /**
  * Created by Allen on 2017/5/3.
  * <p>
- * 网络请求工具类---使用的是全局配置的变量
+ *
+ * @author Allen
+ *         网络请求工具类---使用的是全局配置的变量
  */
 
 public class GlobalRxHttp {

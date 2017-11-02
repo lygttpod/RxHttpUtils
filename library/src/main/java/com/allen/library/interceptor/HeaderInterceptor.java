@@ -1,7 +1,5 @@
 package com.allen.library.interceptor;
 
-import com.allen.library.utils.AppUtils;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,7 +11,9 @@ import okhttp3.Response;
 /**
  * Created by Allen on 2017/5/3.
  * <p>
- * 请求拦截器  统一添加请求头使用
+ *
+ * @author Allen
+ *         请求拦截器  统一添加请求头使用
  */
 
 public class HeaderInterceptor implements Interceptor {
@@ -32,24 +32,7 @@ public class HeaderInterceptor implements Interceptor {
                 request.addHeader(entry.getKey(), (String) entry.getValue());
             }
         }
-//        else {
-//            request
-//                    .addHeader("Content-type", "application/json")
-//                    .addHeader("Version", getAppVersion())
-//                    .addHeader("uuid", getUUID())
-//                    .addHeader("User-Agent", System.getProperty("http.agent"));
-//        }
-
-
         return chain.proceed(request.build());
-    }
-
-    private String getUUID() {
-        return AppUtils.getUUID();
-    }
-
-    private String getAppVersion() {
-        return AppUtils.getAppVersion();
     }
 
 }

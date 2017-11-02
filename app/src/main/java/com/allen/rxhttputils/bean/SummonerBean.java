@@ -1,14 +1,12 @@
 package com.allen.rxhttputils.bean;
 
-import com.allen.library.base.BaseResponse;
-
 import java.util.List;
 
 /**
  * Created by allen on 2017/6/23.
  */
 
-public class SummonerBean extends BaseResponse {
+public class SummonerBean {
 
     /**
      * count : 15

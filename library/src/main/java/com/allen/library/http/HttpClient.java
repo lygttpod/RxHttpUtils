@@ -5,7 +5,9 @@ import okhttp3.OkHttpClient;
 /**
  * Created by allen on 2017/5/31.
  * <p>
- * okHttp client
+ *
+ * @author Allen
+ *         okHttp client
  */
 
 public class HttpClient {

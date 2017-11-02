@@ -6,7 +6,7 @@ def releaseTime() {
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.allen.rxhttputils"
         minSdkVersion 14
@@ -16,14 +16,18 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            def outputFile = output.outputFile
-            if (outputFile != null && outputFile.name.endsWith('.apk')) {
-                // 输出apk名称为XXXX_v1.0_2016-01-15_wandoujia.apk
-                def fileName = "RxHttpUtils_v${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk"
-                output.outputFile = new File(outputFile.parent, fileName)
-            }
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+//            output ->
+//            def outputFile = output.outputFile
+//            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+//                // 输出apk名称为XXXX_v1.0_2016-01-15_wandoujia.apk
+//                def fileName = "RxHttpUtils_v${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk"
+//                output.outputFile = new File(outputFile.parent, fileName)
+
+            outputFileName=rootProject.getName()+"_v"+defaultConfig.versionName+"_"+releaseTime()+"_"+variant.productFlavors[0].name+".apk"
+//
+//            }
         }
     }
 
@@ -34,25 +38,30 @@ android {
         }
     }
 
+    flavorDimensions 'store'
     productFlavors {
 
         // 线上环境
         pro {
+            dimension 'store'
             buildConfigField "String", "BASE_URL", "\"https://api.douban.com/\""
         }
 
         // 上线前的预览版本
         releases {
+            dimension 'store'
             buildConfigField "String", "BASE_URL", "\"https://api.douban.com/\""
         }
 
         // 提测后（测试阶段)
         master {
+            dimension 'store'
             buildConfigField "String", "BASE_URL", "\"https://api.douban.com/\""
         }
 
         // 开发阶段
         dev {
+            dimension 'store'
             buildConfigField "String", "BASE_URL", "\"https://api.douban.com/\""
         }
 
@@ -71,5 +80,4 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.1'
     testCompile 'junit:junit:4.12'
     compile project(':library')
-    compile 'com.zhy:okhttputils:2.6.2'
 }

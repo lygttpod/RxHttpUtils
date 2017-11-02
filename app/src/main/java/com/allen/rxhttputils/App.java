@@ -1,41 +1,36 @@
 package com.allen.rxhttputils;
 
 
-import com.allen.library.base.BaseRxHttpApplication;
-import com.allen.library.RxHttpUtils;
-import com.zhy.http.okhttp.OkHttpUtils;
-import com.zhy.http.okhttp.https.HttpsUtils;
+import android.app.Application;
 
-import okhttp3.OkHttpClient;
+import com.allen.library.RxHttpUtils;
 
 
 /**
  * Created by allen on 2016/12/21.
  * <p>
- * 需要继承 BaseRxHttpApplication
+ *
+ * @author Allen
+ *         需要继承 BaseRxHttpApplication
  */
 
-public class MyApplication extends BaseRxHttpApplication {
+public class App extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        HttpsUtils.SSLParams sslParams = HttpsUtils.getSslSocketFactory(null, null, null);
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager)
-                //其他配置
-                .build();
-        OkHttpUtils.initClient(okHttpClient);
         /**
          * 全局请求的统一配置
          */
+        RxHttpUtils.init(this);
+
         RxHttpUtils
                 .getInstance()
                 //开启全局配置
                 .config()
                 //全局的BaseUrl
-                .setBaseUrl(BuildConfig.BASE_URL)
+                .setBaseUrl("https://api.douban.com/")
                 //开启缓存策略
                 .setCache()
                 //全局的请求头信息

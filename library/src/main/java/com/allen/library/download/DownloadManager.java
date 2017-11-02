@@ -1,7 +1,7 @@
 package com.allen.library.download;
 
 
-import com.allen.library.base.BaseRxHttpApplication;
+import com.allen.library.RxHttpUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,7 +13,9 @@ import okhttp3.ResponseBody;
 /**
  * Created by allen on 2017/6/13.
  * <p>
- * 保存下载的文件
+ *
+ * @author Allen
+ *         保存下载的文件
  */
 
 public class DownloadManager {
@@ -29,7 +31,7 @@ public class DownloadManager {
      */
     public File saveFile(ResponseBody response, final String destFileName, ProgressListener progressListener) throws IOException {
 
-        String destFileDir = BaseRxHttpApplication.getContext().getExternalFilesDir(null) + File.separator;
+        String destFileDir = RxHttpUtils.getContext().getExternalFilesDir(null) + File.separator;
 
         long contentLength = response.contentLength();
         InputStream is = null;
@@ -53,7 +55,7 @@ public class DownloadManager {
 
                 final long finalSum = sum;
 
-                progressListener.onResponseProgress(finalSum, contentLength, (int) ((finalSum * 1.0f / contentLength)*100), finalSum == contentLength, file.getAbsolutePath());
+                progressListener.onResponseProgress(finalSum, contentLength, (int) ((finalSum * 1.0f / contentLength) * 100), finalSum == contentLength, file.getAbsolutePath());
             }
             fos.flush();
 
@@ -74,7 +76,6 @@ public class DownloadManager {
 
         }
     }
-
 
 
 }

@@ -15,9 +15,11 @@ import okhttp3.Response;
 import static java.util.Calendar.getInstance;
 
 /**
- * Created by allen on 2017/5/11.
+ * Created by Allen on 2017/5/11.
+ * <p>
  *
- * 接受服务器发的cookie   并保存到本地
+ * @author Allen
+ *         接受服务器发的cookie   并保存到本地
  */
 
 public class ReceivedCookiesInterceptor implements Interceptor {
@@ -33,23 +35,29 @@ public class ReceivedCookiesInterceptor implements Interceptor {
             for (String header : originalResponse.headers("Set-Cookie")) {
                 cookies.add(header);
             }
-            SPUtils.put(SPKeys.COOKIE,cookies);
+            SPUtils.put(SPKeys.COOKIE, cookies);
         }
         //获取服务器相应时间--用于计算倒计时的时间差
-        if (!originalResponse.header("Date").isEmpty()){
+        if (!originalResponse.header("Date").isEmpty()) {
             long date = dateToStamp(originalResponse.header("Date"));
-            SPUtils.put(SPKeys.DATE,date);
+            SPUtils.put(SPKeys.DATE, date);
         }
 
         return originalResponse;
     }
 
-    /*
-   * 将时间转换为时间戳
-   */
+
+    /**
+     * 将时间转换为时间戳
+     *
+     * @param s date
+     * @return long
+     * @throws android.net.ParseException
+     */
     public static long dateToStamp(String s) throws android.net.ParseException {
-        Date date = new Date(s); //转换为标准时间对象
-        Calendar calendar= getInstance();
+        //转换为标准时间对象
+        Date date = new Date(s);
+        Calendar calendar = getInstance();
         calendar.setTime(date);
         long mTimeInMillis = calendar.getTimeInMillis();
         return mTimeInMillis;

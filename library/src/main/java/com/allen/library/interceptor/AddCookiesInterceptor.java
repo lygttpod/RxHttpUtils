@@ -13,9 +13,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Created by xiaoyao on 2017/5/11.
+ * Created by Allen on 2017/5/11.
  * <p>
- * 请求头里边添加cookie
+ *
+ * @author Allen
+ *         请求头里边添加cookie
  */
 
 public class AddCookiesInterceptor implements Interceptor {
@@ -26,10 +28,11 @@ public class AddCookiesInterceptor implements Interceptor {
         if (preferences != null) {
             for (String cookie : preferences) {
                 builder.addHeader("Cookie", cookie);
-                Log.v("RxHttpUtils", "Adding Header Cookie--->: " + cookie); // This is done so I know which headers are being added; this interceptor is used after the normal logging of OkHttp
+                // This is done so I know which headers are being added; this interceptor is used after the normal logging of OkHttp
+                Log.v("RxHttpUtils", "Adding Header Cookie--->: " + cookie);
             }
         }
-
         return chain.proceed(builder.build());
     }
+
 }

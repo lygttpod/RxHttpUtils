@@ -1,5 +1,6 @@
 package com.allen.library.http;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import java.io.IOException;
@@ -25,7 +26,9 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Created by Allen on 2017/6/26.
  * <p>
- * 证书工具类
+ *
+ * @author Allen
+ *         证书工具类
  */
 
 public class SSLUtils {
@@ -164,10 +167,12 @@ public class SSLUtils {
      * 这是一种有很大安全漏洞的办法
      */
     public static X509TrustManager UnSafeTrustManager = new X509TrustManager() {
+        @SuppressLint("TrustAllX509TrustManager")
         @Override
         public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         }
 
+        @SuppressLint("TrustAllX509TrustManager")
         @Override
         public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         }
