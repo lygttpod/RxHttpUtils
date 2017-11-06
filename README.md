@@ -28,12 +28,12 @@
 
 # 使用说明
 
-### 1、使用前自己的application类必须继承BaseRxHttpApplication
+### 1、在application类里边进行初始化配置(废除以前需要继承BaseRxHttpApplication的尴尬)
 
-> ##### 继承BaseRxHttpApplication之后在自己的Application的onCreate方法中进行初始化配置
+> ##### 在自己的Application的onCreate方法中进行初始化配置
 
 ```
-public class MyApplication extends BaseRxHttpApplication {
+public class MyApplication extends Application {
 
     Map<String, Object> headerMaps = new HashMap<>();
 
@@ -41,30 +41,29 @@ public class MyApplication extends BaseRxHttpApplication {
     public void onCreate() {
         super.onCreate();
 
-        headerMaps.put("header1", "header1");
-        headerMaps.put("header1", "header1");
-
         /**
-         * 全局请求的统一配置
+         * 初始化配置
          */
+        RxHttpUtils.init(this);
+
         RxHttpUtils
                 .getInstance()
                 //开启全局配置
                 .config()
-                //全局的BaseUrl,必须配置(baseurl以 / 结尾)
-                .setBaseUrl(BuildConfig.BASE_URL)
+                //全局的BaseUrl
+                .setBaseUrl("https://api.douban.com/")
                 //开启缓存策略
                 .setCache()
                 //全局的请求头信息
-                .setHeaders(headerMaps)
+                //.setHeaders(headerMaps)
                 //全局持久话cookie,保存本地每次都会携带在header中
                 .setCookie(false)
-                //全局ssl证书认证，支持三种方式
-                //1、信任所有证书,不安全有风险
+                //全局ssl证书认证
+                //信任所有证书,不安全有风险
                 .setSslSocketFactory()
-                //2、使用预埋证书，校验服务端证书（自签名证书）
+                //使用预埋证书，校验服务端证书（自签名证书）
                 //.setSslSocketFactory(getAssets().open("your.cer"))
-                //3、使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
+                //使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
                 //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
                 //全局超时配置
                 .setReadTimeout(10)
@@ -80,53 +79,13 @@ public class MyApplication extends BaseRxHttpApplication {
 ```
 
 
-### 2、自己定义的实体类必须继承BaseResponse基类
+### 2、默认已实现三种数据格式
 
-```
-/**
- * Created by allen on 2017/6/23.
- * <p>
- * 请求结果基类   所有请求结果继承此类
- */
+* 1、CommonObserver  （使用写自己的实体类即可，不用继承任何base）
+* 2、StringObserver   (直接String接收数据)
+* 3、DataObserver     (适合{"code":200,"msg":"描述",data:{}}这样的格式，需要使用BaseData<T>,其中T为data中的数据模型)
 
-public class BaseResponse {
-
-    /**
-     * 错误码
-     */
-    private int code;
-    /**
-     * 错误描述
-     */
-    private String msg;
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    @Override
-    public String toString() {
-        return "BaseResponse{" +
-                "code=" + code +
-                ", msg='" + msg + '\'' +
-                '}';
-    }
-
-}
-```
-
+> 如果以上三种不能满足你的需要，可以分别继承对应的base方法实现自己的逻辑
 
 # 代码实例-----具体参数意义请看下边的参数说明
 
@@ -137,11 +96,6 @@ public class BaseResponse {
                         .getBook()
                         .compose(Transformer.<BookBean>switchSchedulers())
                         .subscribe(new CommonObserver<BookBean>() {
-                            @Override
-                            protected void getDisposable(Disposable d) {
-                                 //方法暴露出来使用者根据需求去取消订阅
-                                 //d.dispose();在onDestroy方法中调用
-                            }
 
                             @Override
                             protected void onError(String errorMsg) {
@@ -155,7 +109,7 @@ public class BaseResponse {
                         });
 ```
                 
-### 2、单个请求配置参数示例(可以根据需求选择性的配置)
+### 2.1、单个请求使用默认配置
 ```
                 //单个请求使用默认配置的参数
                 RxHttpUtils
@@ -165,11 +119,6 @@ public class BaseResponse {
                         .getTop250(10)
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
-                            @Override
-                            protected void getDisposable(Disposable d) {
-                                //方法暴露出来使用者根据需求去取消订阅
-                                disposables.add(d);
-                            }
 
                             @Override
                             protected void onError(String errorMsg) {
@@ -182,7 +131,9 @@ public class BaseResponse {
                             }
                         });
 
-
+```
+### 2.2、单个请求配置参数示例(可以根据需求选择性的配置)
+```
                 //单个请求自己配置相关参数
                 RxHttpUtils
                         .getSInstance()
@@ -200,11 +151,6 @@ public class BaseResponse {
                         .getTop250(10)
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
-                            @Override
-                            protected void getDisposable(Disposable d) {
-                                //方法暴露出来使用者根据需求去取消订阅
-                                disposables.add(d);
-                            }
 
                             @Override
                             protected void onError(String errorMsg) {
@@ -217,8 +163,31 @@ public class BaseResponse {
                             }
                         });
 ```
+### 2.3、单个请求返回string
+```
+                RxHttpUtils.getSInstance()
+                        .baseUrl("https://api.douban.com/")
+                        //注意这两个配置的顺序
+                        .addConverterFactory(ScalarsConverterFactory.create())
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .createSApi(ApiService.class)
+                        .getBookString()
+                        .compose(Transformer.<String>switchSchedulers(loading_dialog))
+                        .subscribe(new StringObserver(loading_dialog) {
+                            @Override
+                            protected void onError(String errorMsg) {
 
+                            }
+
+                            @Override
+                            protected void onSuccess(String data) {
+                                showToast(data);
+                                responseTv.setText(data);
+                            }
+                        });
+```
 ### 3、链式请求--请求参数是上个请求的结果
+
 ```
                 RxHttpUtils
                         .createApi(ApiService.class)
@@ -233,11 +202,6 @@ public class BaseResponse {
                         })
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
-                            @Override
-                            protected void getDisposable(Disposable d) {
-                                //方法暴露出来使用者根据需求去取消订阅
-                                disposables.add(d);
-                            }
 
                             @Override
                             protected void onError(String errorMsg) {
@@ -279,11 +243,24 @@ public class BaseResponse {
                             }
                         });
 ```
+### 5、统一取消请求
+```
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //取消所有请求
+        RxHttpUtils.cancelAllRequest();
+    }
+```
 # 参数说明
 
 > 全局参数：在application中配置的参数都是以setXXX开头的,根据实际需求配置相应参数即可
 
 ```
+
+                //初始化（必须配置）
+                RxHttpUtils.init(this);
+
                 //开启全局配置
                 .config()
                 //全局的BaseUrl
@@ -346,22 +323,46 @@ public class BaseResponse {
 # 注意事项：
 适合请求结果是以下情况的（当然用户可以根据自己的实际需求稍微修改一下代码就能满足自己的需求）
 
-            
+1、如果你的服务器返回的是普通的结果，例如
+```
             code为错误状态码 ; msg为错误描述信息
-            注意：请求成功时，msg字段可有可无。
             {
-            code: 0/400/401...,
-            msg: 错误描述...,
+            "code": 200,
+            "msg": "错误描述",
+            "name":"Allen"
+            "job":"Android"
             ...
             ...
             ...
             }
-            如果你的服务器返回不是以上格式不要惊慌，下载源码，源码其实很简单，自己重写一个BaseResponse基类，根据自己需求处理，
-            修改一下BaseObserver和ISubscriber中泛型继承的类就行了
+```
+
+> 可以直接写自己的实体类即可，使用CommonObserver
+
+2、如果你的服务器返回的是标准的格式，例如
+```
+            code为错误状态码 ; msg为错误描述信息
+            {
+            "code": 200,
+            "msg": "错误描述",
+            "data":{
+                    "name":"Allen"
+                    "job":"Android"
+                    ...
+                    }
+            }
+```
+> 可以直接写自己的实体类,然后使用BaseData<T>，配合DataObserver即可
+
+3、不论服务器返回什么，如果你想要拿到原始数据自行处理，就直接使用StringObserver
+
 
 # 后面会陆续完成文件上传的封装，敬请期待...
 
 # 更新日志
+
+### V2.0.2
+* 优化底层代码，去除必须继承BaseRxHttpApplication和baseResponse的限制，使用更灵活
 
 ### V2.0.1
 * 添加对https的支持

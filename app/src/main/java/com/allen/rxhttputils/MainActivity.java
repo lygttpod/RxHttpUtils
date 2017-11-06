@@ -196,31 +196,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 showToast(s);
                             }
                         });
-
-//                Map<String, Object> map = new HashMap<>();
-//                map.put("targetId", "925644716425547776");
-//                map.put("buyAmount", 1000);
-//                map.put("principalCouponId", 63);
-//
-//                RxHttpUtils.getSInstance()
-//                        .baseUrl("https://master-scbank-gateway-app.51doro.com/api/")
-//                        .createSApi(ApiService.class)
-//                        .getTradeExpected(map)
-//                        .compose(Transformer.<BaseData<DataBean>>switchSchedulers())
-//                        .subscribe(new DataObserver<DataBean>() {
-//                            @Override
-//                            protected void onError(String errorMsg) {
-//
-//                            }
-//
-//                            @Override
-//                            protected void onSuccess(DataBean data) {
-//                                responseTv.setText(data.getCanUsePrincipalCount() + "");
-//                                showToast(data.getCanUseRateCount() + "");
-//                            }
-//                        });
-
-
                 break;
 
             case R.id.multiple_http:

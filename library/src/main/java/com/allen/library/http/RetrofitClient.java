@@ -26,8 +26,7 @@ public class RetrofitClient {
 
         mRetrofitBuilder = new Retrofit.Builder()
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(mOkHttpBuilder.build());
+                .addConverterFactory(GsonConverterFactory.create());
     }
 
 
@@ -50,7 +49,7 @@ public class RetrofitClient {
     }
 
     public Retrofit getRetrofit() {
-        return mRetrofitBuilder.build();
+        return mRetrofitBuilder.client(mOkHttpBuilder.build()).build();
     }
 
 }
