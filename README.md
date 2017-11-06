@@ -22,7 +22,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.0.1'
+        compile 'com.github.lygttpod:RxHttpUtils:2.0.3'
         }
 ```
 
