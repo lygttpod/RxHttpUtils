@@ -52,8 +52,6 @@ public class MyApplication extends Application {
                 .config()
                 //全局的BaseUrl
                 .setBaseUrl("https://api.douban.com/")
-                //开启缓存策略
-                .setCache()
                 //全局的请求头信息
                 //.setHeaders(headerMaps)
                 //全局持久话cookie,保存本地每次都会携带在header中
@@ -83,11 +81,11 @@ public class MyApplication extends Application {
 
 * 1、CommonObserver  （使用写自己的实体类即可，不用继承任何base）
 * 2、StringObserver   (直接String接收数据)
-* 3、DataObserver     (适合{"code":200,"msg":"描述",data:{}}这样的格式，需要使用BaseData<T>,其中T为data中的数据模型)
+* 3、DataObserver     (适合{"code":200,"msg":"描述",data:{}}这样的格式，需要使用BaseData&lt;T&gt; ,其中T为data中的数据模型)
 
 > 如果以上三种不能满足你的需要，可以分别继承对应的base方法实现自己的逻辑
 
-# 代码实例-----具体参数意义请看下边的参数说明
+# 代码实例
 
 ### 1、使用Application里边的全局配置参数的请求示例
 ```
@@ -352,16 +350,15 @@ public class MyApplication extends Application {
                     }
             }
 ```
-> 可以直接写自己的实体类,然后使用BaseData<T>，配合DataObserver即可
+> 可以直接写自己的实体类,然后使用BaseData&lt;T&gt;，配合DataObserver即可
 
 3、不论服务器返回什么，如果你想要拿到原始数据自行处理，就直接使用StringObserver
 
 
-# 后面会陆续完成文件上传的封装，敬请期待...
 
 # 更新日志
 
-### V2.0.2
+### V2.0.3
 * 优化底层代码，去除必须继承BaseRxHttpApplication和baseResponse的限制，使用更灵活
 
 ### V2.0.1
