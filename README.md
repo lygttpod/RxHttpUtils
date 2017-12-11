@@ -22,7 +22,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.0.3'
+        compile 'com.github.lygttpod:RxHttpUtils:2.0.4'
         }
 ```
 
@@ -241,7 +241,29 @@ public class MyApplication extends Application {
                             }
                         });
 ```
-### 5、统一取消请求
+### 5、上传图片
+```
+        RxHttpUtils.uploadImg(uploadUrl, uploadPath)
+                .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
+                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                    @Override
+                    protected void onError(String errorMsg) {
+                        Log.e("allen", "上传失败: " + errorMsg);
+                        showToast(errorMsg);
+                    }
+
+                    @Override
+                    protected void onSuccess(ResponseBody responseBody) {
+                        try {
+                            showToast(responseBody.string());
+                            Log.e("allen", "上传完毕: " + responseBody.string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+```
+### 6、统一取消请求
 ```
     @Override
     protected void onDestroy() {
@@ -357,6 +379,10 @@ public class MyApplication extends Application {
 
 
 # 更新日志
+
+### V2.0.4
+* 新增上传图片功能
+* 针对字段为int，double，long类型，如果后台返回""或者null,则对应返回0，0.00，0L
 
 ### V2.0.3
 * 优化底层代码，去除必须继承BaseRxHttpApplication和baseResponse的限制，使用更灵活
