@@ -7,6 +7,8 @@ import com.allen.library.RxHttpUtils;
 import com.allen.library.base.BaseObserver;
 import com.allen.library.utils.ToastUtils;
 
+import java.io.IOException;
+
 import io.reactivex.disposables.Disposable;
 
 /**

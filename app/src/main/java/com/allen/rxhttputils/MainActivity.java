@@ -1,9 +1,16 @@
 package com.allen.rxhttputils;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Dialog;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,7 +23,14 @@ import com.allen.library.observer.StringObserver;
 import com.allen.rxhttputils.api.ApiService;
 import com.allen.rxhttputils.bean.BookBean;
 import com.allen.rxhttputils.bean.Top250Bean;
+import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
+import com.zxy.tiny.Tiny;
+import com.zxy.tiny.callback.FileCallback;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +39,9 @@ import java.util.TreeMap;
 import io.reactivex.ObservableSource;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import okhttp3.ResponseBody;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
@@ -38,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView responseTv;
 
     private List<Disposable> disposables = new ArrayList<>();
+
+    private int REQUEST_CODE_CHOOSE = 1;
+    private String uploadUrl = "http://server.jeasonlzy.com/OkHttpUtils/upload";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onClick(View v) {
         responseTv.setText("");
@@ -265,17 +285,86 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.upload_http:
 
-//                RxHttpUtils
-//                        .uploadImg("your_upload_url", "your_filePath")
-//                        .subscribe(new Consumer<ResponseBody>() {
-//                            @Override
-//                            public void accept(@NonNull ResponseBody responseBody) throws Exception {
-//                                Log.e("allen", "上传完毕: " + responseBody.string());
-//                            }
-//                        });
-
+                RxPermissions permissions = new RxPermissions(this);
+                permissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(new Consumer<Boolean>() {
+                            @Override
+                            public void accept(Boolean aBoolean) throws Exception {
+                                if (aBoolean) {
+                                    // All requested permissions are granted
+                                    selectPhoto();
+                                } else {
+                                    // At least one permission is denied
+                                    showToast("请授权");
+                                }
+                            }
+                        });
                 break;
             default:
+        }
+    }
+
+    /**
+     * 请求时候带loading的用法
+     *
+     * @param uploadUrl  地址
+     * @param uploadPath 文件路径
+     */
+    private void uploadImgWithLoadingDialog(String uploadUrl, String uploadPath) {
+
+        RxHttpUtils.uploadImg(uploadUrl, uploadPath)
+                .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
+                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                    @Override
+                    protected void onError(String errorMsg) {
+                        Log.e("allen", "上传失败: " + errorMsg);
+                        showToast(errorMsg);
+                    }
+
+                    @Override
+                    protected void onSuccess(ResponseBody responseBody) {
+                        try {
+                            showToast(responseBody.string());
+                            Log.e("allen", "上传完毕: " + responseBody.string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * 选择图片
+     */
+    private void selectPhoto() {
+        Matisse.from(MainActivity.this)
+                .choose(MimeType.allOf())
+                .countable(true)
+                .maxSelectable(1)
+                .gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.grid_expected_size))
+                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+                .thumbnailScale(0.85f)
+                .imageEngine(new GlideEngine())
+                .forResult(REQUEST_CODE_CHOOSE);
+    }
+
+
+    List<Uri> mSelected;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_CHOOSE && resultCode == RESULT_OK) {
+            mSelected = Matisse.obtainResult(data);
+            Log.d("Matisse", "mSelected: " + mSelected);
+            Tiny.FileCompressOptions options = new Tiny.FileCompressOptions();
+            Tiny.getInstance().source(mSelected.get(0)).asFile().withOptions(options).compress(new FileCallback() {
+                @Override
+                public void callback(boolean isSuccess, String outfile, Throwable t) {
+                    //return the compressed file path
+                    uploadImgWithLoadingDialog(uploadUrl, outfile);
+                }
+            });
         }
     }
 

@@ -1,5 +1,7 @@
 package com.allen.library.http;
 
+import com.allen.library.gson.GsonAdapter;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -26,7 +28,7 @@ public class RetrofitClient {
 
         mRetrofitBuilder = new Retrofit.Builder()
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create());
+                .addConverterFactory(GsonConverterFactory.create(GsonAdapter.buildGson()));
     }
 
 

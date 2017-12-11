@@ -1,6 +1,8 @@
 package com.allen.library.upload;
 
 
+import android.app.Dialog;
+
 import com.allen.library.http.RetrofitClient;
 import com.allen.library.interceptor.Transformer;
 
@@ -70,5 +72,20 @@ public class UploadRetrofit {
                 .create(UploadFileApi.class)
                 .uploadImg(uploadUrl, body)
                 .compose(Transformer.<ResponseBody>switchSchedulers());
+    }
+
+    public static Observable<ResponseBody> uploadImg(String uploadUrl, String filePath, Dialog loadingDialog) {
+        File file = new File(filePath);
+
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+
+        MultipartBody.Part body =
+                MultipartBody.Part.createFormData("uploaded_file", file.getName(), requestFile);
+
+        return UploadRetrofit
+                .getInstance()
+                .getRetrofit()
+                .create(UploadFileApi.class)
+                .uploadImg(uploadUrl, body);
     }
 }

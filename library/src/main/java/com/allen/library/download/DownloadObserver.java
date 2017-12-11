@@ -1,5 +1,7 @@
 package com.allen.library.download;
 
+import android.app.Dialog;
+
 import java.io.IOException;
 
 import io.reactivex.Observable;
@@ -21,11 +23,16 @@ import okhttp3.ResponseBody;
 public abstract class DownloadObserver extends BaseDownloadObserver {
 
     private String fileName;
+    private Dialog mProgressDialog;
 
     public DownloadObserver(String fileName) {
         this.fileName = fileName;
     }
 
+    public DownloadObserver(String fileName, Dialog mProgressDialog) {
+        this.fileName = fileName;
+        this.mProgressDialog = mProgressDialog;
+    }
 
     /**
      * 获取disposable 在onDestroy方法中取消订阅disposable.dispose()
