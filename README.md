@@ -106,7 +106,28 @@ public class MyApplication extends Application {
                             }
                         });
 ```
-                
+### 1.1、使用DataObserver请求示例
+ ```
+1、   @GET("api/test")
+       Observable<BaseData<TestBean>> geTestData();
+
+2、
+        RxHttpUtils.createApi(ApiServer.class)
+                .geTestData()
+                .compose(Transformer.<BaseData<TestBean>>switchSchedulers())
+                .subscribe(new DataObserver<TestBean>() {
+                    @Override
+                    protected void onError(String errorMsg) {
+                        
+                    }
+
+                    @Override
+                    protected void onSuccess(TestBean data) {
+
+                    }
+                });
+```
+ 
 ### 2.1、单个请求使用默认配置
 ```
                 //单个请求使用默认配置的参数
