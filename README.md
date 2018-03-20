@@ -22,7 +22,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.0.3'
+        compile 'com.github.lygttpod:RxHttpUtils:2.0.4'
         }
 ```
 
@@ -106,7 +106,28 @@ public class MyApplication extends Application {
                             }
                         });
 ```
-                
+### 1.1、使用DataObserver请求示例
+ ```
+1、   @GET("api/test")
+       Observable<BaseData<TestBean>> geTestData();
+
+2、
+        RxHttpUtils.createApi(ApiServer.class)
+                .geTestData()
+                .compose(Transformer.<BaseData<TestBean>>switchSchedulers())
+                .subscribe(new DataObserver<TestBean>() {
+                    @Override
+                    protected void onError(String errorMsg) {
+                        
+                    }
+
+                    @Override
+                    protected void onSuccess(TestBean data) {
+
+                    }
+                });
+```
+ 
 ### 2.1、单个请求使用默认配置
 ```
                 //单个请求使用默认配置的参数
@@ -241,7 +262,29 @@ public class MyApplication extends Application {
                             }
                         });
 ```
-### 5、统一取消请求
+### 5、上传图片
+```
+        RxHttpUtils.uploadImg(uploadUrl, uploadPath)
+                .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
+                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                    @Override
+                    protected void onError(String errorMsg) {
+                        Log.e("allen", "上传失败: " + errorMsg);
+                        showToast(errorMsg);
+                    }
+
+                    @Override
+                    protected void onSuccess(ResponseBody responseBody) {
+                        try {
+                            showToast(responseBody.string());
+                            Log.e("allen", "上传完毕: " + responseBody.string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+```
+### 6、统一取消请求
 ```
     @Override
     protected void onDestroy() {
@@ -358,6 +401,10 @@ public class MyApplication extends Application {
 
 # 更新日志
 
+### V2.0.4
+* 新增上传图片功能
+* 针对字段为int，double，long类型，如果后台返回""或者null,则对应返回0，0.00，0L
+
 ### V2.0.3
 * 优化底层代码，去除必须继承BaseRxHttpApplication和baseResponse的限制，使用更灵活
 
@@ -371,7 +418,7 @@ public class MyApplication extends Application {
 * 	新增网络缓存
 
 # 意见反馈
-
+加QQ群：688433795
 如果遇到问题或者好的建议，请反馈到：[issue](https://github.com/lygttpod/RxHttpUtils/issues)、[lygttpod@163.com](mailto:lygttpod@163.com) 或者[lygttpod@gmail.com](mailto:lygttpod@gmail.com)
 
 如果觉得对你有用的话，点一下右上的星星赞一下吧!
