@@ -51,7 +51,9 @@ public abstract class StringObserver extends BaseStringObserver {
     @Override
     public void doOnError(String errorMsg) {
         dismissLoading();
-        ToastUtils.showToast(errorMsg);
+        if (!isHideToast()) {
+            ToastUtils.showToast(errorMsg);
+        }
         onError(errorMsg);
     }
 

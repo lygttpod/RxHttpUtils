@@ -50,7 +50,13 @@
             android:id="@+id/upload_http"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="上传图片" />
+            android:text="上传单张图片" />
+
+        <Button
+            android:id="@+id/upload_imgs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="上传多张图片" />
 
         <TextView
             android:id="@+id/response_tv"

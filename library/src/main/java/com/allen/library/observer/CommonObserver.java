@@ -7,8 +7,6 @@ import com.allen.library.RxHttpUtils;
 import com.allen.library.base.BaseObserver;
 import com.allen.library.utils.ToastUtils;
 
-import java.io.IOException;
-
 import io.reactivex.disposables.Disposable;
 
 /**
@@ -46,6 +44,7 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
     protected abstract void onSuccess(T t);
 
 
+
     @Override
     public void doOnSubscribe(Disposable d) {
         RxHttpUtils.addDisposable(d);
@@ -56,7 +55,9 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
-        ToastUtils.showToast(errorMsg);
+        if (!isHideToast()) {
+            ToastUtils.showToast(errorMsg);
+        }
         onError(errorMsg);
     }
 

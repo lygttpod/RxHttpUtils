@@ -125,7 +125,17 @@ public class RxHttpUtils {
      */
     public static Observable<ResponseBody> uploadImg(String uploadUrl, String filePath) {
         return UploadRetrofit.uploadImg(uploadUrl, filePath);
+    }
 
+    /**
+     * 上传多张图片
+     *
+     * @param uploadUrl 地址
+     * @param filePaths 文件路径
+     * @return ResponseBody
+     */
+    public static Observable<ResponseBody> uploadImgs(String uploadUrl, List<String> filePaths) {
+        return UploadRetrofit.uploadImgs(uploadUrl, filePaths);
     }
 
     /**

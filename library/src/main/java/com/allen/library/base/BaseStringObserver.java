@@ -16,6 +16,15 @@ import io.reactivex.disposables.Disposable;
 
 public abstract class BaseStringObserver implements Observer<String>, IStringSubscriber {
 
+    /**
+     * 是否隐藏toast
+     *
+     * @return
+     */
+    protected boolean isHideToast() {
+        return false;
+    }
+
     @Override
     public void onSubscribe(Disposable d) {
         doOnSubscribe(d);

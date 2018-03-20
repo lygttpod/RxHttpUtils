@@ -7,6 +7,7 @@ import com.allen.library.http.RetrofitClient;
 import com.allen.library.interceptor.Transformer;
 
 import java.io.File;
+import java.util.List;
 
 import io.reactivex.Observable;
 import okhttp3.MediaType;
@@ -87,5 +88,26 @@ public class UploadRetrofit {
                 .getRetrofit()
                 .create(UploadFileApi.class)
                 .uploadImg(uploadUrl, body);
+    }
+
+    public static Observable<ResponseBody> uploadImgs(String uploadUrl, List<String> filePaths) {
+
+        MultipartBody.Builder builder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM);
+        for (int i = 0; i < filePaths.size(); i++) {
+            File file = new File(filePaths.get(i));
+            RequestBody imageBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+            //"uploaded_file"+i 后台接收图片流的参数名
+            builder.addFormDataPart("uploaded_file" + i, file.getName(), imageBody);
+        }
+
+        List<MultipartBody.Part> parts = builder.build().parts();
+
+        return UploadRetrofit
+                .getInstance()
+                .getRetrofit()
+                .create(UploadFileApi.class)
+                .uploadImgs(uploadUrl, parts)
+                .compose(Transformer.<ResponseBody>switchSchedulers());
     }
 }

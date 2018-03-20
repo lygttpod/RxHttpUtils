@@ -52,7 +52,6 @@ public abstract class DataObserver<T> extends BaseDataObserver<T> {
      */
     protected abstract void onSuccess(T data);
 
-
     @Override
     public void doOnSubscribe(Disposable d) {
         RxHttpUtils.addDisposable(d);
@@ -61,7 +60,9 @@ public abstract class DataObserver<T> extends BaseDataObserver<T> {
     @Override
     public void doOnError(String errorMsg) {
         dismissLoading();
-        ToastUtils.showToast(errorMsg);
+        if (!isHideToast()) {
+            ToastUtils.showToast(errorMsg);
+        }
         onError(errorMsg);
     }
 

@@ -49,7 +49,14 @@ import static com.allen.library.utils.ToastUtils.showToast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button single_http_default, single_http, single_string_http, global_http, multiple_http, download_http, upload_http;
+    private Button single_http_default,
+            single_http,
+            single_string_http,
+            global_http,
+            multiple_http,
+            download_http,
+            upload_http,
+            upload_imgs;
     private Dialog loading_dialog;
     private TextView responseTv;
 
@@ -78,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         download_http.setOnClickListener(this);
         upload_http = (Button) findViewById(R.id.upload_http);
         upload_http.setOnClickListener(this);
+        upload_imgs = (Button) findViewById(R.id.upload_imgs);
+        upload_imgs.setOnClickListener(this);
 
     }
 
@@ -158,6 +167,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //使用loading的话需要在CommonObserver<XXX>(loading_dialog)中也传去
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                            //默认false
+//                            @Override
+//                            public boolean isHideToast() {
+//                                return true;
+//                            }
+
                             @Override
                             protected void onError(String errorMsg) {
                                 //错误处理
@@ -184,6 +199,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .getBookString()
                         .compose(Transformer.<String>switchSchedulers(loading_dialog))
                         .subscribe(new StringObserver(loading_dialog) {
+                            //默认false   是否隐藏onError的提示
+                            @Override
+                            protected boolean isHideToast() {
+                                return false;
+                            }
+
                             @Override
                             protected void onError(String errorMsg) {
 
@@ -203,6 +224,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .getBook()
                         .compose(Transformer.<BookBean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<BookBean>(loading_dialog) {
+
+                            //默认false   隐藏onError的提示
+                            @Override
+                            protected boolean isHideToast() {
+                                return true;
+                            }
 
                             @Override
                             protected void onError(String errorMsg) {
@@ -292,7 +319,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             public void accept(Boolean aBoolean) throws Exception {
                                 if (aBoolean) {
                                     // All requested permissions are granted
-                                    selectPhoto();
+                                    selectPhoto(1);
+                                } else {
+                                    // At least one permission is denied
+                                    showToast("请授权");
+                                }
+                            }
+                        });
+                break;
+            case R.id.upload_imgs:
+                RxPermissions permissions1 = new RxPermissions(this);
+                permissions1.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(new Consumer<Boolean>() {
+                            @Override
+                            public void accept(Boolean aBoolean) throws Exception {
+                                if (aBoolean) {
+                                    // All requested permissions are granted
+                                    selectPhoto(9);
                                 } else {
                                     // At least one permission is denied
                                     showToast("请授权");
@@ -305,12 +348,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * 请求时候带loading的用法
+     * 上传单张图片
      *
      * @param uploadUrl  地址
      * @param uploadPath 文件路径
      */
-    private void uploadImgWithLoadingDialog(String uploadUrl, String uploadPath) {
+    private void uploadImg(String uploadUrl, String uploadPath) {
 
         RxHttpUtils.uploadImg(uploadUrl, uploadPath)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
@@ -324,23 +367,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     protected void onSuccess(ResponseBody responseBody) {
                         try {
-                            showToast(responseBody.string());
-                            Log.e("allen", "上传完毕: " + responseBody.string());
+                            String msg = responseBody.string();
+                            showToast(msg);
+                            Log.e("allen", "上传完毕: " + msg);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                 });
+
+    }
+
+    /**
+     * 一次上传多张图片
+     *
+     * @param uploadPaths 图片路径
+     */
+    private void uploadImgs(List<String> uploadPaths) {
+
+        RxHttpUtils.uploadImgs("http://t.xinhuo.com/index.php/Api/Pic/uploadPic", uploadPaths)
+                .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
+                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                    @Override
+                    protected void onError(String errorMsg) {
+                        Log.e("allen", "上传失败: " + errorMsg);
+                        showToast(errorMsg);
+                    }
+
+                    @Override
+                    protected void onSuccess(ResponseBody responseBody) {
+                        try {
+                            String msg = responseBody.string();
+                            Log.e("allen", "上传完毕: " + msg);
+                            showToast(msg);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
     }
 
     /**
      * 选择图片
      */
-    private void selectPhoto() {
+    private void selectPhoto(int maxSelectable) {
         Matisse.from(MainActivity.this)
                 .choose(MimeType.allOf())
                 .countable(true)
-                .maxSelectable(1)
+                .maxSelectable(maxSelectable)
                 .gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.grid_expected_size))
                 .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
                 .thumbnailScale(0.85f)
@@ -349,25 +424,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    List<Uri> mSelected;
+    private List<Uri> mSelected;
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_CHOOSE && resultCode == RESULT_OK) {
             mSelected = Matisse.obtainResult(data);
+            final List<String> paths = new ArrayList<>();
             Log.d("Matisse", "mSelected: " + mSelected);
             Tiny.FileCompressOptions options = new Tiny.FileCompressOptions();
-            Tiny.getInstance().source(mSelected.get(0)).asFile().withOptions(options).compress(new FileCallback() {
-                @Override
-                public void callback(boolean isSuccess, String outfile, Throwable t) {
-                    //return the compressed file path
-                    uploadImgWithLoadingDialog(uploadUrl, outfile);
-                }
-            });
+            for (int i = 0; i < mSelected.size(); i++) {
+                Tiny.getInstance().source(mSelected.get(i)).asFile().withOptions(options).compress(new FileCallback() {
+                    @Override
+                    public void callback(boolean isSuccess, String outfile, Throwable t) {
+                        paths.add(outfile);
+                        if (paths.size() == mSelected.size()) {
+                            uploadImgs(paths);
+                        }
+                    }
+                });
+            }
         }
     }
-
 
     @Override
     protected void onDestroy() {
