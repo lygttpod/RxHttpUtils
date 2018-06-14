@@ -35,6 +35,12 @@
             android:text="统一请求---使用全局配置的相关参数" />
 
         <Button
+            android:id="@+id/global_string_http"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="统一请求---接受string" />
+
+        <Button
             android:id="@+id/multiple_http"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

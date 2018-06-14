@@ -2,6 +2,7 @@ package com.allen.library.observer;
 
 
 import android.app.Dialog;
+import android.text.TextUtils;
 
 import com.allen.library.RxHttpUtils;
 import com.allen.library.base.BaseObserver;
@@ -55,7 +56,7 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
-        if (!isHideToast()) {
+        if (!isHideToast()&& !TextUtils.isEmpty(errorMsg)) {
             ToastUtils.showToast(errorMsg);
         }
         onError(errorMsg);

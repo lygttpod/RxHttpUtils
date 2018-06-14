@@ -2,14 +2,15 @@ package com.allen.library.config;
 
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.allen.library.http.HttpClient;
 import com.allen.library.http.SSLUtils;
 import com.allen.library.interceptor.AddCookiesInterceptor;
-import com.allen.library.interceptor.CacheInterceptor;
 import com.allen.library.interceptor.HeaderInterceptor;
+import com.allen.library.interceptor.NetCacheInterceptor;
+import com.allen.library.interceptor.NoNetCacheInterceptor;
 import com.allen.library.interceptor.ReceivedCookiesInterceptor;
+import com.allen.library.interceptor.RxHttpLogger;
 
 import java.io.File;
 import java.io.InputStream;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -77,6 +79,7 @@ public class OkHttpConfig {
         private InputStream bksFile;
         private String password;
         private InputStream[] certificates;
+        private Interceptor[] interceptors;
 
         public Builder setHeaders(Map<String, Object> headerMaps) {
             this.headerMaps = headerMaps;
@@ -123,6 +126,11 @@ public class OkHttpConfig {
             return this;
         }
 
+        public Builder setAddInterceptor(Interceptor... interceptors) {
+            this.interceptors = interceptors;
+            return this;
+        }
+
         public Builder setSslSocketFactory(InputStream... certificates) {
             this.certificates = certificates;
             return this;
@@ -143,12 +151,21 @@ public class OkHttpConfig {
             setCookieConfig();
             setCacheConfig();
             setHeadersConfig();
-            setTimeout();
             setSslConfig();
+            addInterceptors();
+            setTimeout();
             setDebugConfig();
 
             okHttpClient = okHttpClientBuilder.build();
             return okHttpClient;
+        }
+
+        private void addInterceptors() {
+            if (null != interceptors) {
+                for (Interceptor interceptor : interceptors) {
+                    okHttpClientBuilder.addInterceptor(interceptor);
+                }
+            }
         }
 
         /**
@@ -156,16 +173,12 @@ public class OkHttpConfig {
          */
         private void setDebugConfig() {
             if (isDebug) {
-                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-                    @Override
-                    public void log(String message) {
-                        Log.e("RxHttpUtils", message);
-                    }
-                });
-                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-                okHttpClientBuilder.addInterceptor(loggingInterceptor);
+                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RxHttpLogger());
+                logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+                okHttpClientBuilder.addInterceptor(logInterceptor);
             }
         }
+
 
         /**
          * 配置headers
@@ -190,16 +203,16 @@ public class OkHttpConfig {
          */
         private void setCacheConfig() {
             if (isCache) {
-                CacheInterceptor cacheInterceptor = new CacheInterceptor();
                 Cache cache;
                 if (!TextUtils.isEmpty(cachePath) && cacheMaxSize > 0) {
                     cache = new Cache(new File(cachePath), cacheMaxSize);
                 } else {
                     cache = new Cache(new File(defaultCachePath), defaultCacheSize);
                 }
-                okHttpClientBuilder.addInterceptor(cacheInterceptor)
-                        .addNetworkInterceptor(cacheInterceptor)
-                        .cache(cache);
+                okHttpClientBuilder
+                        .cache(cache)
+                        .addInterceptor(new NoNetCacheInterceptor())
+                        .addNetworkInterceptor(new NetCacheInterceptor());
             }
         }
 
