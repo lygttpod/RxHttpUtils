@@ -22,7 +22,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.0.4'
+        compile 'com.github.lygttpod:RxHttpUtils:2.0.5'
         }
 ```
 
@@ -263,6 +263,7 @@ public class MyApplication extends Application {
                         });
 ```
 ### 5、上传图片
+上传单张图片的接口
 ```
         RxHttpUtils.uploadImg(uploadUrl, uploadPath)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
@@ -284,6 +285,21 @@ public class MyApplication extends Application {
                     }
                 });
 ```
+上传多张图片的接口
+```
+        RxHttpUtils.uploadImgs("yourPicUrl", uploadPaths)
+                .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
+                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                    @Override
+                    protected void onError(String errorMsg) {
+                    }
+
+                    @Override
+                    protected void onSuccess(ResponseBody responseBody) {
+                    }
+                });
+```
+
 ### 6、统一取消请求
 ```
     @Override
@@ -293,6 +309,17 @@ public class MyApplication extends Application {
         RxHttpUtils.cancelAllRequest();
     }
 ```
+### 7、onError中默认Toast的控制显示隐藏的配置
+
+* 在CommonObserver或DataObserver或StringObserver中重写isHideToast方法，默认false显示toast
+```
+                            //默认false   隐藏onError的提示
+                            @Override
+                            protected boolean isHideToast() {
+                                return true;
+                            }
+```
+
 # 参数说明
 
 > 全局参数：在application中配置的参数都是以setXXX开头的,根据实际需求配置相应参数即可
@@ -400,6 +427,11 @@ public class MyApplication extends Application {
 
 
 # 更新日志
+
+### V2.0.5
+* 新增上传多张图片的接口
+* 新增onError中默认Toast的控制显示隐藏的配置
+* 在CommonObserver或DataObserver或StringObserver中重写isHideToast方法，默认false显示toast
 
 ### V2.0.4
 * 新增上传图片功能
