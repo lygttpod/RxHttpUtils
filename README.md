@@ -22,7 +22,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.1.0'
+        compile 'com.github.lygttpod:RxHttpUtils:2.1.1'
         }
 ```
 
@@ -492,6 +492,9 @@ public class MyApplication extends Application {
 
 
 # 更新日志
+
+### V2.1.1
+* 修复header参数类型转换异常的bug
 
 ### V2.1.0
 * 支持图文上传
