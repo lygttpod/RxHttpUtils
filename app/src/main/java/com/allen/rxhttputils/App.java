@@ -110,6 +110,7 @@ public class App extends Application {
 //
 //        RxHttpUtils
 //                .getInstance()
+//                .init(this)
 //                .config()
 //                .setBaseUrl(BuildConfig.BASE_URL)
 //                .setOkClient(builder.build());

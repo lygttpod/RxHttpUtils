@@ -14,8 +14,8 @@ import io.reactivex.disposables.Disposable;
  * Created by Allen on 2017/5/3.
  *
  * @author Allen
- *         通用的Observer
- *         用户可以根据自己需求自定义自己的类继承BaseObserver<T>即可
+ * 通用的Observer
+ * 用户可以根据自己需求自定义自己的类继承BaseObserver<T>即可
  */
 
 public abstract class CommonObserver<T> extends BaseObserver<T> {
@@ -45,7 +45,6 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
     protected abstract void onSuccess(T t);
 
 
-
     @Override
     public void doOnSubscribe(Disposable d) {
         RxHttpUtils.addDisposable(d);
@@ -53,10 +52,8 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
 
     @Override
     public void doOnError(String errorMsg) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-        if (!isHideToast()&& !TextUtils.isEmpty(errorMsg)) {
+        dismissLoading();
+        if (!isHideToast() && !TextUtils.isEmpty(errorMsg)) {
             ToastUtils.showToast(errorMsg);
         }
         onError(errorMsg);
@@ -69,6 +66,13 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
 
     @Override
     public void doOnCompleted() {
+        dismissLoading();
+    }
+
+    /**
+     * 隐藏loading对话框
+     */
+    private void dismissLoading() {
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }

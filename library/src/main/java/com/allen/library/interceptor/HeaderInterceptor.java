@@ -29,7 +29,7 @@ public class HeaderInterceptor implements Interceptor {
         Request.Builder request = chain.request().newBuilder();
         if (headerMaps != null && headerMaps.size() > 0) {
             for (Map.Entry<String, Object> entry : headerMaps.entrySet()) {
-                request.addHeader(entry.getKey(), (String) entry.getValue());
+                request.addHeader(entry.getKey(), String.valueOf(entry.getValue()));
             }
         }
         return chain.proceed(request.build());

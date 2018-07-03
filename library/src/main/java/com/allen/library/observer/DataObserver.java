@@ -1,6 +1,7 @@
 package com.allen.library.observer;
 
 import android.app.Dialog;
+import android.text.TextUtils;
 
 import com.allen.library.RxHttpUtils;
 import com.allen.library.base.BaseDataObserver;
@@ -60,7 +61,7 @@ public abstract class DataObserver<T> extends BaseDataObserver<T> {
     @Override
     public void doOnError(String errorMsg) {
         dismissLoading();
-        if (!isHideToast()) {
+        if (!isHideToast()&& !TextUtils.isEmpty(errorMsg)) {
             ToastUtils.showToast(errorMsg);
         }
         onError(errorMsg);
