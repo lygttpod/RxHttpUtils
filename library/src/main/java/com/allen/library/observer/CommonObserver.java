@@ -47,7 +47,8 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
 
     @Override
     public void doOnSubscribe(Disposable d) {
-        RxHttpUtils.addDisposable(d);
+        //RxHttpUtils.addDisposable(d);
+        RxHttpUtils.addToCompositeDisposable(d);
     }
 
     @Override
