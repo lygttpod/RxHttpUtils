@@ -23,7 +23,7 @@ import okhttp3.ResponseBody;
  * Created by allen on 2017/6/22.
  *
  * @author Allen
- *         网络请求
+ * 网络请求
  */
 
 public class RxHttpUtils {
@@ -38,7 +38,6 @@ public class RxHttpUtils {
     private static String networkData;
 
     public static RxHttpUtils getInstance() {
-        checkInitialize();
         if (instance == null) {
             synchronized (RxHttpUtils.class) {
                 if (instance == null) {
@@ -57,8 +56,9 @@ public class RxHttpUtils {
      *
      * @param app Application
      */
-    public static void init(Application app) {
+    public RxHttpUtils init(Application app) {
         context = app;
+        return this;
     }
 
     /**
@@ -74,12 +74,13 @@ public class RxHttpUtils {
      */
     private static void checkInitialize() {
         if (context == null) {
-            throw new ExceptionInInitializerError("请先在全局Application中调用 RxHttpUtils.init() 初始化！");
+            throw new ExceptionInInitializerError("请先在全局Application中调用 RxHttpUtils.getInstance().init(this) 初始化！");
         }
     }
 
 
     public GlobalRxHttp config() {
+        checkInitialize();
         return GlobalRxHttp.getInstance();
     }
 

@@ -1,13 +1,12 @@
 package com.allen.library.upload;
 
 
-import android.app.Dialog;
-
 import com.allen.library.http.RetrofitClient;
-import com.allen.library.interceptor.Transformer;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import okhttp3.MediaType;
@@ -19,13 +18,13 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by allen on 2017/6/14.
- * <p>
- *
- * @author Allen
- *         为上传单独建一个retrofit
+ * <pre>
+ *      @author : Allen
+ *      date    : 2018/06/14
+ *      desc    : 为上传单独建一个retrofit
+ *      version : 1.0
+ * </pre>
  */
-
 public class UploadRetrofit {
 
     private static UploadRetrofit instance;
@@ -59,46 +58,57 @@ public class UploadRetrofit {
         return mRetrofit;
     }
 
+
+    /**
+     * 上传一张图片
+     *
+     * @param uploadUrl 上传图片的服务器url
+     * @param filePath  图片路径
+     * @return Observable
+     */
     public static Observable<ResponseBody> uploadImg(String uploadUrl, String filePath) {
-        File file = new File(filePath);
+        List<String> filePaths = new ArrayList<>();
+        filePaths.add(filePath);
+        return uploadImgsWithParams(uploadUrl, "uploaded_file", null, filePaths);
 
-        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-
-        MultipartBody.Part body =
-                MultipartBody.Part.createFormData("uploaded_file", file.getName(), requestFile);
-
-        return UploadRetrofit
-                .getInstance()
-                .getRetrofit()
-                .create(UploadFileApi.class)
-                .uploadImg(uploadUrl, body)
-                .compose(Transformer.<ResponseBody>switchSchedulers());
     }
 
-    public static Observable<ResponseBody> uploadImg(String uploadUrl, String filePath, Dialog loadingDialog) {
-        File file = new File(filePath);
-
-        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-
-        MultipartBody.Part body =
-                MultipartBody.Part.createFormData("uploaded_file", file.getName(), requestFile);
-
-        return UploadRetrofit
-                .getInstance()
-                .getRetrofit()
-                .create(UploadFileApi.class)
-                .uploadImg(uploadUrl, body);
-    }
-
+    /**
+     * 只上传图片
+     *
+     * @param uploadUrl 上传图片的服务器url
+     * @param filePaths 图片路径
+     * @return Observable
+     */
     public static Observable<ResponseBody> uploadImgs(String uploadUrl, List<String> filePaths) {
+        return uploadImgsWithParams(uploadUrl, "uploaded_file", null, filePaths);
+    }
+
+    /**
+     * 图片和参数同时上传的请求
+     *
+     * @param uploadUrl 上传图片的服务器url
+     * @param fileName  后台协定的接受图片的name（没特殊要求就可以随便写）
+     * @param map       普通参数
+     * @param filePaths 图片路径
+     * @return Observable
+     */
+    public static Observable<ResponseBody> uploadImgsWithParams(String uploadUrl, String fileName, Map<String, Object> map, List<String> filePaths) {
 
         MultipartBody.Builder builder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM);
+
+        if (null != map) {
+            for (String key : map.keySet()) {
+                builder.addFormDataPart(key, (String) map.get(key));
+            }
+        }
+
         for (int i = 0; i < filePaths.size(); i++) {
             File file = new File(filePaths.get(i));
             RequestBody imageBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-            //"uploaded_file"+i 后台接收图片流的参数名
-            builder.addFormDataPart("uploaded_file" + i, file.getName(), imageBody);
+            //"medias"+i 后台接收图片流的参数名
+            builder.addFormDataPart(fileName, file.getName(), imageBody);
         }
 
         List<MultipartBody.Part> parts = builder.build().parts();
@@ -107,7 +117,6 @@ public class UploadRetrofit {
                 .getInstance()
                 .getRetrofit()
                 .create(UploadFileApi.class)
-                .uploadImgs(uploadUrl, parts)
-                .compose(Transformer.<ResponseBody>switchSchedulers());
+                .uploadImgs(uploadUrl, parts);
     }
 }

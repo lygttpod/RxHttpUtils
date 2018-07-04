@@ -2,12 +2,13 @@ package com.allen.library.http;
 
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.allen.library.interceptor.AddCookiesInterceptor;
-import com.allen.library.interceptor.CacheInterceptor;
 import com.allen.library.interceptor.HeaderInterceptor;
+import com.allen.library.interceptor.NetCacheInterceptor;
+import com.allen.library.interceptor.NoNetCacheInterceptor;
 import com.allen.library.interceptor.ReceivedCookiesInterceptor;
+import com.allen.library.interceptor.RxHttpLogger;
 
 import java.io.File;
 import java.io.InputStream;
@@ -28,7 +29,7 @@ import retrofit2.Retrofit;
  * Created by allen on 2017/6/22.
  *
  * @author Allen
- *         网络请求-----可以对每个请求单独配置参数
+ * 网络请求-----可以对每个请求单独配置参数
  */
 
 public class SingleRxHttp {
@@ -239,33 +240,6 @@ public class SingleRxHttp {
 
         OkHttpClient.Builder singleOkHttpBuilder = new OkHttpClient.Builder();
 
-        singleOkHttpBuilder.retryOnConnectionFailure(true);
-
-        singleOkHttpBuilder.addInterceptor(new HeaderInterceptor(headerMaps));
-
-        if (cache) {
-            CacheInterceptor cacheInterceptor = new CacheInterceptor();
-            Cache cache;
-            if (!TextUtils.isEmpty(cachePath) && cacheMaxSize > 0) {
-                cache = new Cache(new File(cachePath), cacheMaxSize);
-            } else {
-                cache = new Cache(new File(Environment.getExternalStorageDirectory().getPath() + "/rxHttpCacheData")
-                        , 1024 * 1024 * 100);
-            }
-            singleOkHttpBuilder.addInterceptor(cacheInterceptor)
-                    .addNetworkInterceptor(cacheInterceptor)
-                    .cache(cache);
-        }
-        if (isShowLog) {
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-                @Override
-                public void log(String message) {
-                    Log.e("RxHttpUtils", message);
-                }
-            });
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            singleOkHttpBuilder.addInterceptor(loggingInterceptor);
-        }
 
         if (saveCookie) {
             singleOkHttpBuilder
@@ -273,16 +247,42 @@ public class SingleRxHttp {
                     .addInterceptor(new ReceivedCookiesInterceptor());
         }
 
-        singleOkHttpBuilder.readTimeout(readTimeout > 0 ? readTimeout : 10, TimeUnit.SECONDS);
-
-        singleOkHttpBuilder.writeTimeout(writeTimeout > 0 ? writeTimeout : 10, TimeUnit.SECONDS);
-
-        singleOkHttpBuilder.connectTimeout(connectTimeout > 0 ? connectTimeout : 10, TimeUnit.SECONDS);
+        if (cache) {
+            Cache cache;
+            if (!TextUtils.isEmpty(cachePath) && cacheMaxSize > 0) {
+                cache = new Cache(new File(cachePath), cacheMaxSize);
+            } else {
+                cache = new Cache(new File(Environment.getExternalStorageDirectory().getPath() + "/rxHttpCacheData")
+                        , 1024 * 1024 * 100);
+            }
+            singleOkHttpBuilder
+                    .cache(cache)
+                    .addInterceptor(new NoNetCacheInterceptor())
+                    .addNetworkInterceptor(new NetCacheInterceptor());
+        }
 
         if (sslParams != null) {
             singleOkHttpBuilder.sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
         }
 
+        singleOkHttpBuilder.readTimeout(readTimeout > 0 ? readTimeout : 10, TimeUnit.SECONDS);
+
+        singleOkHttpBuilder.writeTimeout(writeTimeout > 0 ? writeTimeout : 10, TimeUnit.SECONDS);
+
+        singleOkHttpBuilder.connectTimeout(connectTimeout > 0 ? connectTimeout : 10, TimeUnit.SECONDS);
+        singleOkHttpBuilder.retryOnConnectionFailure(true);
+
+        singleOkHttpBuilder.addInterceptor(new HeaderInterceptor(headerMaps));
+
+
+        if (isShowLog) {
+            HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RxHttpLogger());
+            logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            singleOkHttpBuilder.addInterceptor(logInterceptor);
+        }
+
+
         return singleOkHttpBuilder;
     }
+
 }

@@ -1,22 +1,6 @@
 package com.allen.library.http;
 
-import android.os.Environment;
-import android.text.TextUtils;
-import android.util.Log;
-
-import com.allen.library.interceptor.AddCookiesInterceptor;
-import com.allen.library.interceptor.CacheInterceptor;
-import com.allen.library.interceptor.HeaderInterceptor;
-import com.allen.library.interceptor.ReceivedCookiesInterceptor;
-
-import java.io.File;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.Cache;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
 /**
@@ -24,12 +8,15 @@ import retrofit2.Retrofit;
  * <p>
  *
  * @author Allen
- *         网络请求工具类---使用的是全局配置的变量
+ * 网络请求工具类---使用的是全局配置的变量
  */
 
 public class GlobalRxHttp {
 
     private static GlobalRxHttp instance;
+
+    public GlobalRxHttp() {
+    }
 
     public static GlobalRxHttp getInstance() {
 
@@ -67,160 +54,6 @@ public class GlobalRxHttp {
         return this;
     }
 
-
-    /**
-     * 添加统一的请求头
-     *
-     * @param headerMaps
-     * @return
-     */
-    public GlobalRxHttp setHeaders(Map<String, Object> headerMaps) {
-        getGlobalOkHttpBuilder().addInterceptor(new HeaderInterceptor(headerMaps));
-        return this;
-    }
-
-    /**
-     * 是否开启请求日志
-     *
-     * @param isShowLog
-     * @return
-     */
-    public GlobalRxHttp setLog(boolean isShowLog) {
-        if (isShowLog) {
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-                @Override
-                public void log(String message) {
-                    Log.e("RxHttpUtils", message);
-                }
-            });
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            getGlobalOkHttpBuilder().addInterceptor(loggingInterceptor);
-        }
-        return this;
-    }
-
-    /**
-     * 开启缓存，缓存到默认路径
-     *
-     * @return
-     */
-    public GlobalRxHttp setCache() {
-        CacheInterceptor cacheInterceptor = new CacheInterceptor();
-        Cache cache = new Cache(new File(Environment.getExternalStorageDirectory().getPath() + "/rxHttpCacheData")
-                , 1024 * 1024 * 100);
-        getGlobalOkHttpBuilder().addInterceptor(cacheInterceptor)
-                .addNetworkInterceptor(cacheInterceptor)
-                .cache(cache);
-        return this;
-    }
-
-    /**
-     * 设置缓存路径及缓存文件大小
-     *
-     * @param cachePath
-     * @param maxSize
-     * @return
-     */
-    public GlobalRxHttp setCache(String cachePath, long maxSize) {
-        if (!TextUtils.isEmpty(cachePath) && maxSize > 0) {
-            CacheInterceptor cacheInterceptor = new CacheInterceptor();
-            Cache cache = new Cache(new File(cachePath), maxSize);
-            getGlobalOkHttpBuilder()
-                    .addInterceptor(cacheInterceptor)
-                    .addNetworkInterceptor(cacheInterceptor)
-                    .cache(cache);
-        }
-
-        return this;
-    }
-
-    /**
-     * 持久化保存cookie保存到sp文件中
-     *
-     * @param saveCookie
-     * @return
-     */
-    public GlobalRxHttp setCookie(boolean saveCookie) {
-        if (saveCookie) {
-            getGlobalOkHttpBuilder()
-                    .addInterceptor(new AddCookiesInterceptor())
-                    .addInterceptor(new ReceivedCookiesInterceptor());
-        }
-        return this;
-    }
-
-
-    /**
-     * 设置读取超时时间
-     *
-     * @param second
-     * @return
-     */
-    public GlobalRxHttp setReadTimeout(long second) {
-        getGlobalOkHttpBuilder().readTimeout(second, TimeUnit.SECONDS);
-        return this;
-    }
-
-    /**
-     * 设置写入超时时间
-     *
-     * @param second
-     * @return
-     */
-    public GlobalRxHttp setWriteTimeout(long second) {
-        getGlobalOkHttpBuilder().readTimeout(second, TimeUnit.SECONDS);
-        return this;
-    }
-
-    /**
-     * 设置连接超时时间
-     *
-     * @param second
-     * @return
-     */
-    public GlobalRxHttp setConnectTimeout(long second) {
-        getGlobalOkHttpBuilder().readTimeout(second, TimeUnit.SECONDS);
-        return this;
-    }
-
-    /**
-     * 信任所有证书,不安全有风险
-     *
-     * @return
-     */
-    public GlobalRxHttp setSslSocketFactory() {
-        SSLUtils.SSLParams sslParams = SSLUtils.getSslSocketFactory();
-        getGlobalOkHttpBuilder().sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
-        return this;
-    }
-
-    /**
-     * 使用预埋证书，校验服务端证书（自签名证书）
-     *
-     * @param certificates
-     * @return
-     */
-    public GlobalRxHttp setSslSocketFactory(InputStream... certificates) {
-        SSLUtils.SSLParams sslParams = SSLUtils.getSslSocketFactory(certificates);
-        getGlobalOkHttpBuilder().sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
-        return this;
-    }
-
-    /**
-     * 使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
-     *
-     * @param bksFile
-     * @param password
-     * @param certificates
-     * @return
-     */
-    public GlobalRxHttp setSslSocketFactory(InputStream bksFile, String password, InputStream... certificates) {
-        SSLUtils.SSLParams sslParams = SSLUtils.getSslSocketFactory(bksFile, password, certificates);
-        getGlobalOkHttpBuilder().sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
-        return this;
-    }
-
-
     /**
      * 全局的 retrofit
      *
@@ -235,13 +68,10 @@ public class GlobalRxHttp {
      *
      * @return
      */
-    public Retrofit.Builder getGlobalRetrofitBuilder() {
+    private Retrofit.Builder getGlobalRetrofitBuilder() {
         return RetrofitClient.getInstance().getRetrofitBuilder();
     }
 
-    public OkHttpClient.Builder getGlobalOkHttpBuilder() {
-        return HttpClient.getInstance().getBuilder();
-    }
 
     /**
      * 使用全局变量的请求

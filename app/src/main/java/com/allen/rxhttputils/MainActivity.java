@@ -49,14 +49,7 @@ import static com.allen.library.utils.ToastUtils.showToast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button single_http_default,
-            single_http,
-            single_string_http,
-            global_http,
-            multiple_http,
-            download_http,
-            upload_http,
-            upload_imgs;
+    private Button download_http;
     private Dialog loading_dialog;
     private TextView responseTv;
 
@@ -71,22 +64,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loading_dialog = new AlertDialog.Builder(this).setMessage("loading...").create();
         setContentView(R.layout.activity_main);
         responseTv = (TextView) findViewById(R.id.response_tv);
-        single_http_default = (Button) findViewById(R.id.single_http_default);
-        single_http_default.setOnClickListener(this);
-        single_http = (Button) findViewById(R.id.single_http);
-        single_http.setOnClickListener(this);
-        single_string_http = (Button) findViewById(R.id.single_string_http);
-        single_string_http.setOnClickListener(this);
-        global_http = (Button) findViewById(R.id.global_http);
-        global_http.setOnClickListener(this);
-        multiple_http = (Button) findViewById(R.id.multiple_http);
-        multiple_http.setOnClickListener(this);
+        findViewById(R.id.single_http_default).setOnClickListener(this);
+        findViewById(R.id.single_http).setOnClickListener(this);
+        findViewById(R.id.single_string_http).setOnClickListener(this);
+        findViewById(R.id.global_http).setOnClickListener(this);
+        findViewById(R.id.multiple_http).setOnClickListener(this);
         download_http = (Button) findViewById(R.id.download_http);
-        download_http.setOnClickListener(this);
-        upload_http = (Button) findViewById(R.id.upload_http);
-        upload_http.setOnClickListener(this);
-        upload_imgs = (Button) findViewById(R.id.upload_imgs);
-        upload_imgs.setOnClickListener(this);
+        findViewById(R.id.download_http).setOnClickListener(this);
+        findViewById(R.id.upload_http).setOnClickListener(this);
+        findViewById(R.id.upload_imgs).setOnClickListener(this);
+        findViewById(R.id.global_string_http).setOnClickListener(this);
 
     }
 
@@ -136,9 +123,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .baseUrl("https://api.douban.com/")
                         //单个请求的header
                         .addHeaders(headerMaps)
-                        //根据需求自行配置
-                        .addCallAdapterFactory(null)
-                        .addConverterFactory(null)
                         //单个请求是否开启缓存
                         .cache(true)
                         //单个请求的缓存路径及缓存大小，不设置的话有默认值
@@ -239,6 +223,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             @Override
                             protected void onSuccess(BookBean bookBean) {
                                 String s = bookBean.getSummary();
+                                responseTv.setText(s);
+                                showToast(s);
+                            }
+                        });
+                break;
+            case R.id.global_string_http:
+                RxHttpUtils
+                        .createApi(ApiService.class)
+                        .getBookString()
+                        .compose(Transformer.<String>switchSchedulers(loading_dialog))
+                        .subscribe(new CommonObserver<String>(loading_dialog) {
+                            @Override
+                            protected void onError(String errorMsg) {
+
+                            }
+
+                            @Override
+                            protected void onSuccess(String s) {
                                 responseTv.setText(s);
                                 showToast(s);
                             }

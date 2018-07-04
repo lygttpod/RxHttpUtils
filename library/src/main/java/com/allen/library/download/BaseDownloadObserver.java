@@ -1,13 +1,6 @@
 package com.allen.library.download;
 
-import android.widget.Toast;
-
-import com.allen.library.RxHttpUtils;
 import com.allen.library.exception.ApiException;
-
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 
 import io.reactivex.Observer;
 import io.reactivex.annotations.NonNull;
