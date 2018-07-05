@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
 
@@ -34,8 +35,8 @@ public class RxHttpUtils {
     private static Application context;
 
     private static List<Disposable> disposables;
-
     private static String networkData;
+    private static CompositeDisposable mCompositeDisposable;
 
     public static RxHttpUtils getInstance() {
         if (instance == null) {
@@ -161,6 +162,16 @@ public class RxHttpUtils {
     }
 
     /**
+     * 添加订阅
+     */
+    public static void addToCompositeDisposable(Disposable mDisposable) {
+        if (mCompositeDisposable == null) {
+            mCompositeDisposable = new CompositeDisposable();
+        }
+        mCompositeDisposable.add(mDisposable);
+    }
+
+    /**
      * 取消所有请求
      */
     public static void cancelAllRequest() {
@@ -169,6 +180,15 @@ public class RxHttpUtils {
                 disposable.dispose();
             }
             disposables.clear();
+        }
+    }
+
+    /**
+     * 取消所有订阅
+     */
+    public static void clearAllCompositeDisposable() {
+        if (mCompositeDisposable != null) {
+            mCompositeDisposable.clear();
         }
     }
 
