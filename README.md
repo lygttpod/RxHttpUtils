@@ -524,8 +524,11 @@ public class MyApplication extends Application {
 * 	新增网络缓存
 
 # 意见反馈
-加QQ群：688433795
-<a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=6be43956d6497751e40854cb9d84b867d76c782bc4e41b829fd2138c32f4ade8"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="QQ交流群" title="QQ交流群"></a>
+
+<a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=33dacdd367ca0b5a9ba96a196a6658666b442b3ec528850e377d50f3d607f26b"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="STV&amp;RxHttp交流群" title="STV&amp;RxHttp交流群"></a>
+
+或者手动加QQ群：688433795
+
 如果遇到问题或者好的建议，请反馈到：[issue](https://github.com/lygttpod/RxHttpUtils/issues)、[lygttpod@163.com](mailto:lygttpod@163.com) 或者[lygttpod@gmail.com](mailto:lygttpod@gmail.com)
 
 如果觉得对你有用的话，点一下右上的星星赞一下吧!
