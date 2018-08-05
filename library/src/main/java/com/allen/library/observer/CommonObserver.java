@@ -4,7 +4,6 @@ package com.allen.library.observer;
 import android.app.Dialog;
 import android.text.TextUtils;
 
-import com.allen.library.RxHttpUtils;
 import com.allen.library.base.BaseObserver;
 import com.allen.library.utils.ToastUtils;
 
@@ -47,8 +46,8 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
 
     @Override
     public void doOnSubscribe(Disposable d) {
-        //RxHttpUtils.addDisposable(d);
-        RxHttpUtils.addToCompositeDisposable(d);
+        //自行管理取消请求  重写doOnSubscribe方法调用如下方法即可加入，在onDestroy中调用RxHttpUtils.clearAllCompositeDisposable()
+        //RxHttpUtils.addToCompositeDisposable(d);
     }
 
     @Override

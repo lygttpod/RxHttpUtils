@@ -22,7 +22,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.1.1'
+        compile 'com.github.lygttpod:RxHttpUtils:2.1.2'
         }
 ```
 
@@ -84,8 +84,9 @@ public class MyApplication extends Application {
                 //1、在有网络的时候，先去读缓存，缓存时间到了，再去访问网络获取数据；
                 //2、在没有网络的时候，去读缓存中的数据。
                 .setCache(true)
-                //全局持久话cookie,保存本地每次都会携带在header中（默认false）
-                .setSaveCookie(true)
+                //全局持久话cookie,保存到内存（new MemoryCookieStore()）或者保存到本地（new SPCookieStore(this)）
+                //不设置的话，默认不对cookie做处理
+                .setCookieType(new SPCookieStore(this))
                 //可以添加自己的拦截器(比如使用自己熟悉三方的缓存库等等)
                 //.setAddInterceptor(null)
                 //全局ssl证书认证
@@ -205,7 +206,7 @@ public class MyApplication extends Application {
                         .cache(true)
                         .cachePath("cachePath", 1024 * 1024 * 100)
                         .sslSocketFactory()
-                        .saveCookie(true)
+                        .cookieType(new MemoryCookieStore())
                         .writeTimeout(10)
                         .readTimeout(10)
                         .connectTimeout(10)
@@ -492,6 +493,19 @@ public class MyApplication extends Application {
 
 
 # 更新日志
+
+### V2.1.2
+* cookie持久化方案去除拦截器方式，使用cookieJar管理
+```
+    支持两种方式做持久化cookie，默认不设置的话不对cookie做任何处理
+    new MemoryCookieStore()  持久化到内存
+    new SPCookieStore(this)  持久化到本地SP文件
+
+    使用方式如下
+    .setCookieType(new SPCookieStore(this))
+```
+> 感谢[**OkGo**](https://github.com/jeasonlzy/okhttp-OkGo) 提供的技术方案
+
 
 ### V2.1.1
 * 修复header参数类型转换异常的bug

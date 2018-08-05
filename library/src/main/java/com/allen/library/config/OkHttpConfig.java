@@ -3,13 +3,13 @@ package com.allen.library.config;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.allen.library.cookie.CookieJarImpl;
+import com.allen.library.cookie.store.CookieStore;
 import com.allen.library.http.HttpClient;
 import com.allen.library.http.SSLUtils;
-import com.allen.library.interceptor.AddCookiesInterceptor;
 import com.allen.library.interceptor.HeaderInterceptor;
 import com.allen.library.interceptor.NetCacheInterceptor;
 import com.allen.library.interceptor.NoNetCacheInterceptor;
-import com.allen.library.interceptor.ReceivedCookiesInterceptor;
 import com.allen.library.interceptor.RxHttpLogger;
 
 import java.io.File;
@@ -72,7 +72,7 @@ public class OkHttpConfig {
         private boolean isCache;
         private String cachePath;
         private long cacheMaxSize;
-        private boolean isSaveCookie;
+        private CookieStore cookieStore;
         private long readTimeout;
         private long writeTimeout;
         private long connectTimeout;
@@ -106,8 +106,8 @@ public class OkHttpConfig {
             return this;
         }
 
-        public Builder setSaveCookie(boolean isSaveCookie) {
-            this.isSaveCookie = isSaveCookie;
+        public Builder setCookieType(CookieStore cookieStore) {
+            this.cookieStore = cookieStore;
             return this;
         }
 
@@ -191,10 +191,8 @@ public class OkHttpConfig {
          * 配饰cookie保存到sp文件中
          */
         private void setCookieConfig() {
-            if (isSaveCookie) {
-                okHttpClientBuilder
-                        .addInterceptor(new AddCookiesInterceptor())
-                        .addInterceptor(new ReceivedCookiesInterceptor());
+            if (null != cookieStore) {
+                okHttpClientBuilder.cookieJar(new CookieJarImpl(cookieStore));
             }
         }
 

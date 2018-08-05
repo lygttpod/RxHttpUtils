@@ -4,20 +4,22 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 
-import com.allen.library.constant.SPKeys;
+import com.allen.library.config.OkHttpConfig;
+import com.allen.library.cookie.CookieJarImpl;
+import com.allen.library.cookie.store.CookieStore;
 import com.allen.library.download.DownloadRetrofit;
 import com.allen.library.http.GlobalRxHttp;
 import com.allen.library.http.SingleRxHttp;
 import com.allen.library.upload.UploadRetrofit;
-import com.allen.library.utils.SPUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import okhttp3.Cookie;
+import okhttp3.HttpUrl;
 import okhttp3.ResponseBody;
 
 /**
@@ -35,7 +37,6 @@ public class RxHttpUtils {
     private static Application context;
 
     private static List<Disposable> disposables;
-    private static String networkData;
     private static CompositeDisposable mCompositeDisposable;
 
     public static RxHttpUtils getInstance() {
@@ -141,14 +142,56 @@ public class RxHttpUtils {
     }
 
     /**
-     * 获取Cookie
-     *
-     * @return HashSet
+     * 获取全局的CookieJarImpl实例
      */
-    public static HashSet<String> getCookie() {
-        HashSet<String> preferences = (HashSet<String>) SPUtils.get(SPKeys.COOKIE, new HashSet<String>());
-        return preferences;
+    private static CookieJarImpl getCookieJar() {
+        return (CookieJarImpl) OkHttpConfig.getOkHttpClient().cookieJar();
     }
+
+    /**
+     * 获取全局的CookieStore实例
+     */
+    private static CookieStore getCookieStore() {
+        return getCookieJar().getCookieStore();
+    }
+
+    /**
+     * 获取所有cookie
+     */
+    public static List<Cookie> getAllCookie() {
+        CookieStore cookieStore = getCookieStore();
+        List<Cookie> allCookie = cookieStore.getAllCookie();
+        return allCookie;
+    }
+
+    /**
+     * 获取某个url所对应的全部cookie
+     */
+    public static List<Cookie> getCookieByUrl(String url) {
+        CookieStore cookieStore = getCookieStore();
+        HttpUrl httpUrl = HttpUrl.parse(url);
+        List<Cookie> cookies = cookieStore.getCookie(httpUrl);
+        return cookies;
+    }
+
+
+    /**
+     * 移除全部cookie
+     */
+    public static void removeAllCookie() {
+        CookieStore cookieStore = getCookieStore();
+        cookieStore.removeAllCookie();
+    }
+
+    /**
+     * 移除某个url下的全部cookie
+     */
+    public static void removeCookieByUrl(String url) {
+        HttpUrl httpUrl = HttpUrl.parse(url);
+        CookieStore cookieStore = getCookieStore();
+        cookieStore.removeCookie(httpUrl);
+    }
+
 
     /**
      * 获取disposable 在onDestroy方法中取消订阅disposable.dispose()

@@ -16,6 +16,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.allen.library.RxHttpUtils;
+import com.allen.library.cookie.store.MemoryCookieStore;
+import com.allen.library.cookie.store.SPCookieStore;
 import com.allen.library.download.DownloadObserver;
 import com.allen.library.interceptor.Transformer;
 import com.allen.library.observer.CommonObserver;
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
                         //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
                         //单个请求是否持久化cookie
-                        .saveCookie(true)
+                        .cookieType(new MemoryCookieStore())
                         //单个请求超时
                         .writeTimeout(10)
                         .readTimeout(10)

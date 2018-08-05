@@ -3,7 +3,6 @@ package com.allen.library.observer;
 import android.app.Dialog;
 import android.text.TextUtils;
 
-import com.allen.library.RxHttpUtils;
 import com.allen.library.base.BaseStringObserver;
 import com.allen.library.utils.ToastUtils;
 
@@ -14,8 +13,8 @@ import io.reactivex.disposables.Disposable;
  * Created by Allen on 2017/10/31.
  *
  * @author Allen
- *         <p>
- *         自定义Observer 处理string回调
+ * <p>
+ * 自定义Observer 处理string回调
  */
 
 public abstract class StringObserver extends BaseStringObserver {
@@ -46,14 +45,14 @@ public abstract class StringObserver extends BaseStringObserver {
 
     @Override
     public void doOnSubscribe(Disposable d) {
-        //RxHttpUtils.addDisposable(d);
-        RxHttpUtils.addToCompositeDisposable(d);
+        //自行管理取消请求  重写doOnSubscribe方法调用如下方法即可加入，在onDestroy中调用RxHttpUtils.clearAllCompositeDisposable()
+        //RxHttpUtils.addToCompositeDisposable(d);
     }
 
     @Override
     public void doOnError(String errorMsg) {
         dismissLoading();
-        if (!isHideToast()&& !TextUtils.isEmpty(errorMsg)) {
+        if (!isHideToast() && !TextUtils.isEmpty(errorMsg)) {
             ToastUtils.showToast(errorMsg);
         }
         onError(errorMsg);

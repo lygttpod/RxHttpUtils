@@ -10,23 +10,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/single_http_default"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="单个请求---使用默认配置" />
-
-        <Button
-            android:id="@+id/single_http"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="单个请求---自己配置请求基础参数" />
-
-        <Button
-            android:id="@+id/single_string_http"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="单个请求---返回字符串" />
 
         <Button
             android:id="@+id/global_http"
@@ -63,6 +46,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="上传多张图片" />
+
+        <Button
+            android:id="@+id/single_http_default"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="单个请求---使用默认配置" />
+
+        <Button
+            android:id="@+id/single_http"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="单个请求---自己配置请求基础参数" />
+
+        <Button
+            android:id="@+id/single_string_http"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="单个请求---返回字符串" />
 
         <TextView
             android:id="@+id/response_tv"

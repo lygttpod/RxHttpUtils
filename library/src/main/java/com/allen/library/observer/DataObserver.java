@@ -3,7 +3,6 @@ package com.allen.library.observer;
 import android.app.Dialog;
 import android.text.TextUtils;
 
-import com.allen.library.RxHttpUtils;
 import com.allen.library.base.BaseDataObserver;
 import com.allen.library.bean.BaseData;
 import com.allen.library.utils.ToastUtils;
@@ -14,18 +13,18 @@ import io.reactivex.disposables.Disposable;
  * Created by Allen on 2017/10/31.
  *
  * @author Allen
- *         <p>
- *         针对特定格式的时候设置的通用的Observer
- *         用户可以根据自己需求自定义自己的类继承BaseDataObserver<T>即可
- *         适用于
- *         {
- *         "code":200,
- *         "msg":"成功"
- *         "data":{
- *         "userName":"test"
- *         "token":"abcdefg123456789"
- *         "uid":"1"}
- *         }
+ * <p>
+ * 针对特定格式的时候设置的通用的Observer
+ * 用户可以根据自己需求自定义自己的类继承BaseDataObserver<T>即可
+ * 适用于
+ * {
+ * "code":200,
+ * "msg":"成功"
+ * "data":{
+ * "userName":"test"
+ * "token":"abcdefg123456789"
+ * "uid":"1"}
+ * }
  */
 
 public abstract class DataObserver<T> extends BaseDataObserver<T> {
@@ -55,14 +54,14 @@ public abstract class DataObserver<T> extends BaseDataObserver<T> {
 
     @Override
     public void doOnSubscribe(Disposable d) {
-        //RxHttpUtils.addDisposable(d);
-        RxHttpUtils.addToCompositeDisposable(d);
+        //自行管理取消请求  重写doOnSubscribe方法调用如下方法即可加入，在onDestroy中调用RxHttpUtils.clearAllCompositeDisposable()
+        //RxHttpUtils.addToCompositeDisposable(d);
     }
 
     @Override
     public void doOnError(String errorMsg) {
         dismissLoading();
-        if (!isHideToast()&& !TextUtils.isEmpty(errorMsg)) {
+        if (!isHideToast() && !TextUtils.isEmpty(errorMsg)) {
             ToastUtils.showToast(errorMsg);
         }
         onError(errorMsg);

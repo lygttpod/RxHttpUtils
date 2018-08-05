@@ -5,6 +5,7 @@ import android.app.Application;
 
 import com.allen.library.RxHttpUtils;
 import com.allen.library.config.OkHttpConfig;
+import com.allen.library.cookie.store.SPCookieStore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,8 +70,9 @@ public class App extends Application {
                 //1、在有网络的时候，先去读缓存，缓存时间到了，再去访问网络获取数据；
                 //2、在没有网络的时候，去读缓存中的数据。
                 .setCache(true)
-                //全局持久话cookie,保存本地每次都会携带在header中（默认false）
-                .setSaveCookie(true)
+                //全局持久话cookie,保存到内存（new MemoryCookieStore()）或者保存到本地（new SPCookieStore(this)）
+                //不设置的话，默认不对cookie做处理
+                .setCookieType(new SPCookieStore(this))
                 //可以添加自己的拦截器(比如使用自己熟悉三方的缓存库等等)
                 //.setAddInterceptor(null)
                 //全局ssl证书认证
