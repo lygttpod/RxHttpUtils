@@ -23,7 +23,6 @@ public abstract class BaseDownloadObserver implements Observer<ResponseBody> {
      */
     protected abstract void doOnError(String errorMsg);
 
-
     @Override
     public void onError(@NonNull Throwable e) {
         String error = ApiException.handleException(e).getMessage();

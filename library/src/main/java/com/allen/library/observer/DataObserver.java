@@ -53,10 +53,7 @@ public abstract class DataObserver<T> extends BaseDataObserver<T> {
     protected abstract void onSuccess(T data);
 
     @Override
-    public void doOnSubscribe(Disposable d) {
-        //自行管理取消请求  重写doOnSubscribe方法调用如下方法即可加入，在onDestroy中调用RxHttpUtils.clearAllCompositeDisposable()
-        //RxHttpUtils.addToCompositeDisposable(d);
-    }
+    public void doOnSubscribe(Disposable d) { }
 
     @Override
     public void doOnError(String errorMsg) {

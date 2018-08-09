@@ -1,6 +1,6 @@
 package com.allen.library.config;
 
-import android.os.Environment;
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.allen.library.cookie.CookieJarImpl;
@@ -34,7 +34,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class OkHttpConfig {
 
 
-    private static final String defaultCachePath = Environment.getExternalStorageDirectory().getPath() + "/rxHttpCacheData";
+    private static String defaultCachePath;
     private static final long defaultCacheSize = 1024 * 1024 * 100;
     private static final long defaultTimeout = 10;
 
@@ -67,6 +67,7 @@ public class OkHttpConfig {
     }
 
     public static class Builder {
+        public Context context;
         private Map<String, Object> headerMaps;
         private boolean isDebug;
         private boolean isCache;
@@ -80,6 +81,10 @@ public class OkHttpConfig {
         private String password;
         private InputStream[] certificates;
         private Interceptor[] interceptors;
+
+        public Builder(Context context) {
+            this.context = context;
+        }
 
         public Builder setHeaders(Map<String, Object> headerMaps) {
             this.headerMaps = headerMaps;
@@ -200,6 +205,7 @@ public class OkHttpConfig {
          * 配置缓存
          */
         private void setCacheConfig() {
+            defaultCachePath = context.getExternalCacheDir().getPath() + "/RxHttpCacheData";
             if (isCache) {
                 Cache cache;
                 if (!TextUtils.isEmpty(cachePath) && cacheMaxSize > 0) {

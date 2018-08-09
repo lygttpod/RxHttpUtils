@@ -1,10 +1,15 @@
 package com.allen.library.download;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
+
+import com.allen.library.manage.RxHttpManager;
+import com.allen.library.observer.CommonObserver;
 
 import java.io.IOException;
 
 import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
@@ -17,7 +22,7 @@ import okhttp3.ResponseBody;
  * <p>
  *
  * @author Allen
- *         文件下载
+ * 文件下载
  */
 
 public abstract class DownloadObserver extends BaseDownloadObserver {
@@ -35,18 +40,23 @@ public abstract class DownloadObserver extends BaseDownloadObserver {
     }
 
     /**
-     * 获取disposable 在onDestroy方法中取消订阅disposable.dispose()
-     *
-     * @param d Disposable
-     */
-    protected abstract void getDisposable(Disposable d);
-
-    /**
      * 失败回调
      *
      * @param errorMsg errorMsg
      */
     protected abstract void onError(String errorMsg);
+
+    /**
+     * 标记网络请求的tag
+     * tag下的一组或一个请求，用来处理一个页面的所以请求或者某个请求
+     * 设置一个tag就行就可以取消当前页面所有请求或者某个请求了
+     *
+     * @return string
+     */
+    protected String setTag() {
+        return null;
+    }
+
 
     /**
      * 成功回调
@@ -72,17 +82,23 @@ public abstract class DownloadObserver extends BaseDownloadObserver {
 
     @Override
     public void onSubscribe(@NonNull Disposable d) {
-        getDisposable(d);
+        RxHttpManager.get().add(setTag(), d);
     }
 
+    @SuppressLint("CheckResult")
     @Override
     public void onNext(@NonNull ResponseBody responseBody) {
         Observable
                 .just(responseBody)
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<ResponseBody>() {
+                .subscribe(new Observer<ResponseBody>() {
                     @Override
-                    public void accept(@NonNull ResponseBody responseBody) throws Exception {
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ResponseBody responseBody) {
                         try {
                             new DownloadManager().saveFile(responseBody, fileName, new ProgressListener() {
                                 @Override
@@ -102,8 +118,26 @@ public abstract class DownloadObserver extends BaseDownloadObserver {
                             });
 
                         } catch (IOException e) {
-                            doOnError(e.getMessage());
+                            Observable
+                                    .just(e.getMessage())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Consumer<String>() {
+                                        @Override
+                                        public void accept(String s) throws Exception {
+                                            doOnError(s);
+                                        }
+                                    });
                         }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
                     }
                 });
 

@@ -1,8 +1,8 @@
 package com.allen.library.http;
 
-import android.os.Environment;
 import android.text.TextUtils;
 
+import com.allen.library.RxHttpUtils;
 import com.allen.library.cookie.CookieJarImpl;
 import com.allen.library.cookie.store.CookieStore;
 import com.allen.library.interceptor.HeaderInterceptor;
@@ -250,7 +250,7 @@ public class SingleRxHttp {
             if (!TextUtils.isEmpty(cachePath) && cacheMaxSize > 0) {
                 cache = new Cache(new File(cachePath), cacheMaxSize);
             } else {
-                cache = new Cache(new File(Environment.getExternalStorageDirectory().getPath() + "/rxHttpCacheData")
+                cache = new Cache(new File(RxHttpUtils.getContext().getExternalCacheDir().getPath() + "/RxHttpCacheData")
                         , 1024 * 1024 * 100);
             }
             singleOkHttpBuilder

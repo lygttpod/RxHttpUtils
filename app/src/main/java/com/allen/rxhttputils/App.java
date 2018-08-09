@@ -63,7 +63,7 @@ public class App extends Application {
 //        }
 
         OkHttpClient okHttpClient = new OkHttpConfig
-                .Builder()
+                .Builder(this)
                 //全局的请求头信息
                 .setHeaders(headerMaps)
                 //开启缓存策略(默认false)

@@ -46,8 +46,6 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
 
     @Override
     public void doOnSubscribe(Disposable d) {
-        //自行管理取消请求  重写doOnSubscribe方法调用如下方法即可加入，在onDestroy中调用RxHttpUtils.clearAllCompositeDisposable()
-        //RxHttpUtils.addToCompositeDisposable(d);
     }
 
     @Override
