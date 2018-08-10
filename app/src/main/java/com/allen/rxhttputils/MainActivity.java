@@ -94,12 +94,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .createApi(ApiService.class)
                         .getBook()
                         .compose(Transformer.<BookBean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<BookBean>(loading_dialog) {
+                        .subscribe(new CommonObserver<BookBean>() {
 
                             //默认false   隐藏onError的提示
                             @Override
                             protected boolean isHideToast() {
-                                return true;
+                                return false;
                             }
 
                             //tag下的一组或一个请求，用来处理一个页面的所以请求或者某个请求
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .createApi(ApiService.class)
                         .getBookString()
                         .compose(Transformer.<String>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<String>(loading_dialog) {
+                        .subscribe(new CommonObserver<String>() {
 
                             @Override
                             protected String setTag() {
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         })
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                        .subscribe(new CommonObserver<Top250Bean>() {
                             @Override
                             protected String setTag() {
                                 return "tag2";
@@ -267,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .createSApi(ApiService.class)
                         .getTop250(5)
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                        .subscribe(new CommonObserver<Top250Bean>() {
                             @Override
                             protected String setTag() {
                                 return "tag4";
@@ -327,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //如果需要请求loading需要传入自己的loading_dialog
                         //使用loading的话需要在CommonObserver<XXX>(loading_dialog)中也传去
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                        .subscribe(new CommonObserver<Top250Bean>() {
                             //默认false
 //                            @Override
 //                            public boolean isHideToast() {
@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .createSApi(ApiService.class)
                         .getBookString()
                         .compose(Transformer.<String>switchSchedulers(loading_dialog))
-                        .subscribe(new StringObserver(loading_dialog) {
+                        .subscribe(new StringObserver() {
                             //默认false   是否隐藏onError的提示
                             @Override
                             protected boolean isHideToast() {
@@ -394,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         RxHttpUtils.uploadImg(uploadUrl, uploadPath)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
-                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                .subscribe(new CommonObserver<ResponseBody>() {
 
                     @Override
                     protected String setTag() {
@@ -430,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         RxHttpUtils.uploadImgs("http://t.xinhuo.com/index.php/Api/Pic/uploadPic", uploadPaths)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
-                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                .subscribe(new CommonObserver<ResponseBody>() {
 
                     @Override
                     protected String setTag() {

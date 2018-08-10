@@ -31,6 +31,15 @@ public class NoNetCacheInterceptor implements Interceptor {
                     .build();
 
             Response response = chain.proceed(request);
+
+            //没网的时候如果也没缓存的话就走网络
+            if (response.code() == 504) {
+                request = request.newBuilder()
+                        .cacheControl(CacheControl.FORCE_NETWORK)
+                        .build();
+                return chain.proceed(request);
+            }
+
             return response.newBuilder()
                     .header("Cache-Control", "public, only-if-cached, max-stale=3600")
                     .removeHeader("Pragma")

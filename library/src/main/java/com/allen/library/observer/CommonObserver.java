@@ -1,7 +1,6 @@
 package com.allen.library.observer;
 
 
-import android.app.Dialog;
 import android.text.TextUtils;
 
 import com.allen.library.base.BaseObserver;
@@ -19,15 +18,6 @@ import io.reactivex.disposables.Disposable;
 
 public abstract class CommonObserver<T> extends BaseObserver<T> {
 
-
-    private Dialog mProgressDialog;
-
-    public CommonObserver() {
-    }
-
-    public CommonObserver(Dialog progressDialog) {
-        mProgressDialog = progressDialog;
-    }
 
     /**
      * 失败回调
@@ -50,7 +40,6 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
 
     @Override
     public void doOnError(String errorMsg) {
-        dismissLoading();
         if (!isHideToast() && !TextUtils.isEmpty(errorMsg)) {
             ToastUtils.showToast(errorMsg);
         }
@@ -64,15 +53,6 @@ public abstract class CommonObserver<T> extends BaseObserver<T> {
 
     @Override
     public void doOnCompleted() {
-        dismissLoading();
     }
 
-    /**
-     * 隐藏loading对话框
-     */
-    private void dismissLoading() {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-    }
 }

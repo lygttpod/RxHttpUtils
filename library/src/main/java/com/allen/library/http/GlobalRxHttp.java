@@ -1,5 +1,7 @@
 package com.allen.library.http;
 
+import java.util.HashMap;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
@@ -15,7 +17,13 @@ public class GlobalRxHttp {
 
     private static GlobalRxHttp instance;
 
+    /**
+     * 缓存retrofit针对同一个ApiService不会重复创建retrofit对象
+     */
+    private static HashMap<String, Object> retrofitServiceCache;
+
     public GlobalRxHttp() {
+        retrofitServiceCache = new HashMap<>();
     }
 
     public static GlobalRxHttp getInstance() {
@@ -81,7 +89,15 @@ public class GlobalRxHttp {
      * @return
      */
     public static <K> K createGApi(final Class<K> cls) {
-        return getGlobalRetrofit().create(cls);
+        if (retrofitServiceCache == null) {
+            retrofitServiceCache = new HashMap<>();
+        }
+        K retrofitService = (K) retrofitServiceCache.get(cls.getCanonicalName());
+        if (retrofitService == null) {
+            retrofitService = getGlobalRetrofit().create(cls);
+            retrofitServiceCache.put(cls.getCanonicalName(), retrofitService);
+        }
+        return retrofitService;
     }
 
 

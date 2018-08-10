@@ -1,6 +1,5 @@
 package com.allen.library.observer;
 
-import android.app.Dialog;
 import android.text.TextUtils;
 
 import com.allen.library.base.BaseStringObserver;
@@ -19,15 +18,6 @@ import io.reactivex.disposables.Disposable;
 
 public abstract class StringObserver extends BaseStringObserver {
 
-    private Dialog mProgressDialog;
-
-    public StringObserver() {
-    }
-
-    public StringObserver(Dialog progressDialog) {
-        mProgressDialog = progressDialog;
-    }
-
     /**
      * 失败回调
      *
@@ -44,11 +34,11 @@ public abstract class StringObserver extends BaseStringObserver {
 
 
     @Override
-    public void doOnSubscribe(Disposable d) { }
+    public void doOnSubscribe(Disposable d) {
+    }
 
     @Override
     public void doOnError(String errorMsg) {
-        dismissLoading();
         if (!isHideToast() && !TextUtils.isEmpty(errorMsg)) {
             ToastUtils.showToast(errorMsg);
         }
@@ -63,15 +53,6 @@ public abstract class StringObserver extends BaseStringObserver {
 
     @Override
     public void doOnCompleted() {
-        dismissLoading();
     }
 
-    /**
-     * 隐藏loading对话框
-     */
-    private void dismissLoading() {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-    }
 }
