@@ -22,7 +22,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.1.3'
+        compile 'com.github.lygttpod:RxHttpUtils:2.1.4'
         }
 ```
 
@@ -240,7 +240,7 @@ b、
                              }
                          })
                          .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                         .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                         .subscribe(new CommonObserver<Top250Bean>() {
 
                              @Override
                              protected void onError(String errorMsg) {
@@ -267,7 +267,7 @@ b、
                         .createSApi(ApiService.class)
                         .getTop250(10)
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                        .subscribe(new CommonObserver<Top250Bean>() {
 
                             @Override
                             protected void onError(String errorMsg) {
@@ -299,7 +299,7 @@ b、
                         .createSApi(ApiService.class)
                         .getTop250(10)
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                        .subscribe(new CommonObserver<Top250Bean>() {
 
                             @Override
                             protected void onError(String errorMsg) {
@@ -322,7 +322,7 @@ b、
                         .createSApi(ApiService.class)
                         .getBookString()
                         .compose(Transformer.<String>switchSchedulers(loading_dialog))
-                        .subscribe(new StringObserver(loading_dialog) {
+                        .subscribe(new StringObserver() {
                             @Override
                             protected void onError(String errorMsg) {
 
@@ -369,7 +369,7 @@ b、
 ```
         RxHttpUtils.uploadImg(uploadUrl, uploadPath)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
-                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                .subscribe(new CommonObserver<ResponseBody>() {
                     @Override
                     protected void onError(String errorMsg) {
                         Log.e("allen", "上传失败: " + errorMsg);
@@ -391,7 +391,7 @@ b、
 ```
         RxHttpUtils.uploadImgs("yourPicUrl", uploadPaths)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
-                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                .subscribe(new CommonObserver<ResponseBody>() {
                     @Override
                     protected void onError(String errorMsg) {
                     }
@@ -568,6 +568,12 @@ b、
 
 # 更新日志
 
+### V2.1.4
+* 修复无网络且无缓存时候的依然读取缓存导致504错误的问题;
+* 新增对Retrofit进行缓存处理，避免重复创建Retrofit对象;
+* 在XXXObserver中去掉对loading的处理，统一放在Transformer中控制
+
+
 ### V2.1.3
 * 重写取消请求的方法，通过设置tag可以管理一个请求或一组请求，默认tag为空
 ```
@@ -600,7 +606,6 @@ b、
                 //调取如下方法取消多个或多组请求
                 RxHttpUtils.cancel("yourTag1","yourTag2","yourTag3");
 ```
-
 
 ### V2.1.2
 * cookie持久化方案去除拦截器方式，使用cookieJar管理
