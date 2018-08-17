@@ -428,7 +428,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void uploadImgs(List<String> uploadPaths) {
 
-        RxHttpUtils.uploadImgs("http://t.xinhuo.com/index.php/Api/Pic/uploadPic", uploadPaths)
+        RxHttpUtils.uploadImages("http://t.xinhuo.com/index.php/Api/Pic/uploadPic", uploadPaths)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
                 .subscribe(new CommonObserver<ResponseBody>() {
 

@@ -13,12 +13,10 @@ import com.allen.library.http.SingleRxHttp;
 import com.allen.library.manage.RxHttpManager;
 import com.allen.library.upload.UploadRetrofit;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import okhttp3.Cookie;
 import okhttp3.HttpUrl;
 import okhttp3.ResponseBody;
@@ -37,15 +35,11 @@ public class RxHttpUtils {
     @SuppressLint("StaticFieldLeak")
     private static Application context;
 
-    private static List<Disposable> disposables;
-    private static CompositeDisposable mCompositeDisposable;
-
     public static RxHttpUtils getInstance() {
         if (instance == null) {
             synchronized (RxHttpUtils.class) {
                 if (instance == null) {
                     instance = new RxHttpUtils();
-                    disposables = new ArrayList<>();
                 }
             }
 
@@ -101,9 +95,11 @@ public class RxHttpUtils {
 
     /**
      * 获取单个请求配置实例
+     * 后续版本即将移除---推荐使用全局配置的请求
      *
      * @return SingleRxHttp
      */
+    @Deprecated
     public static SingleRxHttp getSInstance() {
 
         return SingleRxHttp.getInstance();
@@ -113,8 +109,8 @@ public class RxHttpUtils {
     /**
      * 下载文件
      *
-     * @param fileUrl
-     * @return
+     * @param fileUrl 地址
+     * @return ResponseBody
      */
     public static Observable<ResponseBody> downloadFile(String fileUrl) {
         return DownloadRetrofit.downloadFile(fileUrl);
@@ -128,7 +124,7 @@ public class RxHttpUtils {
      * @return ResponseBody
      */
     public static Observable<ResponseBody> uploadImg(String uploadUrl, String filePath) {
-        return UploadRetrofit.uploadImg(uploadUrl, filePath);
+        return UploadRetrofit.uploadImage(uploadUrl, filePath);
     }
 
     /**
@@ -138,8 +134,28 @@ public class RxHttpUtils {
      * @param filePaths 文件路径
      * @return ResponseBody
      */
-    public static Observable<ResponseBody> uploadImgs(String uploadUrl, List<String> filePaths) {
-        return UploadRetrofit.uploadImgs(uploadUrl, filePaths);
+    public static Observable<ResponseBody> uploadImages(String uploadUrl, List<String> filePaths) {
+        return UploadRetrofit.uploadImages(uploadUrl, filePaths);
+    }
+
+    /**
+     * 上传多张图片
+     *
+     * @param uploadUrl 地址
+     * @param filePaths 文件路径
+     * @return ResponseBody
+     */
+    /**
+     * 上传多张图片
+     *
+     * @param uploadUrl 地址
+     * @param fileName  后台接收文件流的参数名
+     * @param paramsMap 参数
+     * @param filePaths 文件路径
+     * @return ResponseBody
+     */
+    public static Observable<ResponseBody> uploadImagesWithParams(String uploadUrl, String fileName, Map<String, Object> paramsMap, List<String> filePaths) {
+        return UploadRetrofit.uploadFilesWithParams(uploadUrl, fileName, paramsMap, filePaths);
     }
 
     /**

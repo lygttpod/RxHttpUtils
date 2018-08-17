@@ -6,7 +6,6 @@ import com.google.gson.JsonSerializer;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONException;
 
-import java.io.IOException;
 import java.io.NotSerializableException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -46,12 +45,7 @@ public class ApiException extends Exception {
         if (e instanceof HttpException) {
             HttpException httpException = (HttpException) e;
             ex = new ApiException(httpException, httpException.code());
-            try {
-                ex.message = httpException.response().errorBody().string();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                ex.message = e1.getMessage();
-            }
+            ex.message = httpException.getMessage();
         } else if (e instanceof SocketTimeoutException) {
             ex = new ApiException(e, ERROR.TIMEOUT_ERROR);
             ex.message = "网络连接超时，请检查您的网络状态，稍后重试！";
