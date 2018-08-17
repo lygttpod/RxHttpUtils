@@ -22,7 +22,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.1.4'
+        compile 'com.github.lygttpod:RxHttpUtils:2.1.5'
         }
 ```
 
@@ -254,7 +254,7 @@ b、
                          });
  ```
 
-# 3、单个请求配置
+# 3、单个请求配置(即将废除)
 
 > ## 温馨提示：针对某些请求有特殊要求的才建议使用此类方法，没特殊要求不建议使用
 
@@ -567,6 +567,9 @@ b、
 
 
 # 更新日志
+
+### V2.1.5
+* 修复errorBody中为空时候异常信息无法获取的bug
 
 ### V2.1.4
 * 修复无网络且无缓存时候的依然读取缓存导致504错误的问题;
