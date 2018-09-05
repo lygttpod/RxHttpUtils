@@ -3,9 +3,6 @@
 # 重磅推出 RxHttpUtils 2.x 版本
 ## RxJava+Retrofit封装，基于RxJava2和Retrofit2重构，便捷使用
 
-> ## 上次封装的是基于RxJava1版本的，时隔半年多之后现在推出基于RxJava2的版本，相比上一版本提升不少，配置更加灵活，现在放出来供大家学习使用，使用过程中如有问题欢迎提出建议，不断完善这个库！
-
-
 ### 添加Gradle依赖
 
 先在项目根目录的 build.gradle 的 repositories 添加:
@@ -22,13 +19,12 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.1.4'
+        compile 'com.github.lygttpod:RxHttpUtils:2.1.5'
         }
 ```
 
 # 使用说明
-* ### 升级到2.1.0之后，在application中配置方式有变，老用户升级请注意
-### 1、在application类里边进行初始化配置(废除以前需要继承BaseRxHttpApplication的尴尬)
+### 1、在application类里边进行初始化配置
 
 > ##### 在自己的Application的onCreate方法中进行初始化配置
 ```
@@ -39,42 +35,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-      ---------------------------以下是2.1.0之前的配置方式----------------------------------------
-    
-        /**
-         * 初始化配置
-         */
-        RxHttpUtils.init(this);
 
-        RxHttpUtils
-                .getInstance()
-                //开启全局配置
-                .config()
-                //全局的BaseUrl
-                .setBaseUrl("https://api.douban.com/")
-                //全局的请求头信息
-                //.setHeaders(headerMaps)
-                //全局持久话cookie,保存本地每次都会携带在header中
-                .setCookie(false)
-                //全局ssl证书认证
-                //信任所有证书,不安全有风险
-                .setSslSocketFactory()
-                //使用预埋证书，校验服务端证书（自签名证书）
-                //.setSslSocketFactory(getAssets().open("your.cer"))
-                //使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
-                //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
-                //全局超时配置
-                .setReadTimeout(10)
-                //全局超时配置
-                .setWriteTimeout(10)
-                //全局超时配置
-                .setConnectTimeout(10)
-                //全局是否打开请求log日志
-                .setLog(true);
-               
-      ---------------------------以上是2.1.0之前的配置方式----------------------------------------
-      
-      ---------------------------以下是2.1.0之后的配置方式----------------------------------------
               OkHttpClient okHttpClient = new OkHttpConfig
                 .Builder(this)
                 //全局的请求头信息
@@ -113,9 +74,6 @@ public class MyApplication extends Application {
                 .setBaseUrl("https://api.douban.com/")
                 //开启全局配置
                 .setOkClient(okHttpClient);
-
-      ---------------------------以上是2.1.0之后的配置方式----------------------------------------
-
       
     }
 }
@@ -254,7 +212,7 @@ b、
                          });
  ```
 
-# 3、单个请求配置
+# 3、~~单个请求配置(即将废除)~~
 
 > ## 温馨提示：针对某些请求有特殊要求的才建议使用此类方法，没特殊要求不建议使用
 
@@ -567,6 +525,9 @@ b、
 
 
 # 更新日志
+
+### V2.1.5
+* 修复errorBody中为空时候异常信息无法获取的bug
 
 ### V2.1.4
 * 修复无网络且无缓存时候的依然读取缓存导致504错误的问题;
