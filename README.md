@@ -19,7 +19,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.1.5'
+        compile 'com.github.lygttpod:RxHttpUtils:2.1.6'
         }
 ```
 
@@ -526,6 +526,8 @@ b、
 
 # 更新日志
 
+### V2.1.6
+* 修复日志打印使用StringBuilder导致多线程使用线程不安全的问题（表现在多个请求同时进行的时候出现异常的bug），使用StringBuffer代替StringBuilder
 ### V2.1.5
 * 修复errorBody中为空时候异常信息无法获取的bug
 
