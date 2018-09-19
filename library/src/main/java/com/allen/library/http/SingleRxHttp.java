@@ -1,13 +1,13 @@
 package com.allen.library.http;
 
-import android.os.Environment;
 import android.text.TextUtils;
 
-import com.allen.library.interceptor.AddCookiesInterceptor;
+import com.allen.library.RxHttpUtils;
+import com.allen.library.cookie.CookieJarImpl;
+import com.allen.library.cookie.store.CookieStore;
 import com.allen.library.interceptor.HeaderInterceptor;
 import com.allen.library.interceptor.NetCacheInterceptor;
 import com.allen.library.interceptor.NoNetCacheInterceptor;
-import com.allen.library.interceptor.ReceivedCookiesInterceptor;
 import com.allen.library.interceptor.RxHttpLogger;
 
 import java.io.File;
@@ -42,7 +42,7 @@ public class SingleRxHttp {
 
     private boolean isShowLog = true;
     private boolean cache = false;
-    private boolean saveCookie = true;
+    private CookieStore cookieStore;
 
     private String cachePath;
     private long cacheMaxSize;
@@ -108,8 +108,8 @@ public class SingleRxHttp {
         return this;
     }
 
-    public SingleRxHttp saveCookie(boolean saveCookie) {
-        this.saveCookie = saveCookie;
+    public SingleRxHttp cookieType(CookieStore cookieStore) {
+        this.cookieStore = cookieStore;
         return this;
     }
 
@@ -241,10 +241,8 @@ public class SingleRxHttp {
         OkHttpClient.Builder singleOkHttpBuilder = new OkHttpClient.Builder();
 
 
-        if (saveCookie) {
-            singleOkHttpBuilder
-                    .addInterceptor(new AddCookiesInterceptor())
-                    .addInterceptor(new ReceivedCookiesInterceptor());
+        if (null != cookieStore) {
+            singleOkHttpBuilder.cookieJar(new CookieJarImpl(cookieStore));
         }
 
         if (cache) {
@@ -252,7 +250,7 @@ public class SingleRxHttp {
             if (!TextUtils.isEmpty(cachePath) && cacheMaxSize > 0) {
                 cache = new Cache(new File(cachePath), cacheMaxSize);
             } else {
-                cache = new Cache(new File(Environment.getExternalStorageDirectory().getPath() + "/rxHttpCacheData")
+                cache = new Cache(new File(RxHttpUtils.getContext().getExternalCacheDir().getPath() + "/RxHttpCacheData")
                         , 1024 * 1024 * 100);
             }
             singleOkHttpBuilder

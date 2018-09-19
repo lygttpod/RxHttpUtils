@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.allen.library.RxHttpUtils;
+import com.allen.library.cookie.store.MemoryCookieStore;
 import com.allen.library.download.DownloadObserver;
 import com.allen.library.interceptor.Transformer;
 import com.allen.library.observer.CommonObserver;
@@ -38,7 +39,6 @@ import java.util.TreeMap;
 
 import io.reactivex.ObservableSource;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import okhttp3.ResponseBody;
@@ -49,11 +49,9 @@ import static com.allen.library.utils.ToastUtils.showToast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button download_http;
+    private Button download_http, download_cancel_http;
     private Dialog loading_dialog;
     private TextView responseTv;
-
-    private List<Disposable> disposables = new ArrayList<>();
 
     private int REQUEST_CODE_CHOOSE = 1;
     private String uploadUrl = "http://server.jeasonlzy.com/OkHttpUtils/upload";
@@ -70,7 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.global_http).setOnClickListener(this);
         findViewById(R.id.multiple_http).setOnClickListener(this);
         download_http = (Button) findViewById(R.id.download_http);
+        download_cancel_http = (Button) findViewById(R.id.download_cancel_http);
         findViewById(R.id.download_http).setOnClickListener(this);
+        findViewById(R.id.download_cancel_http).setOnClickListener(this);
         findViewById(R.id.upload_http).setOnClickListener(this);
         findViewById(R.id.upload_imgs).setOnClickListener(this);
         findViewById(R.id.global_string_http).setOnClickListener(this);
@@ -88,6 +88,178 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         headerMaps.put("header2", "header2");
 
         switch (v.getId()) {
+
+            case R.id.global_http:
+                RxHttpUtils
+                        .createApi(ApiService.class)
+                        .getBook()
+                        .compose(Transformer.<BookBean>switchSchedulers(loading_dialog))
+                        .subscribe(new CommonObserver<BookBean>() {
+
+                            //默认false   隐藏onError的提示
+                            @Override
+                            protected boolean isHideToast() {
+                                return false;
+                            }
+
+                            //tag下的一组或一个请求，用来处理一个页面的所以请求或者某个请求
+                            //设置一个tag就行就可以取消当前页面所有请求或者某个请求了
+                            @Override
+                            protected String setTag() {
+                                return "tag1";
+                            }
+
+                            @Override
+                            protected void onError(String errorMsg) {
+
+                            }
+
+                            @Override
+                            protected void onSuccess(BookBean bookBean) {
+                                String s = bookBean.getSummary();
+                                responseTv.setText(s);
+                                showToast(s);
+                            }
+                        });
+
+                break;
+            case R.id.global_string_http:
+                RxHttpUtils
+                        .createApi(ApiService.class)
+                        .getBookString()
+                        .compose(Transformer.<String>switchSchedulers(loading_dialog))
+                        .subscribe(new CommonObserver<String>() {
+
+                            @Override
+                            protected String setTag() {
+                                return "tag1";
+                            }
+
+                            @Override
+                            protected void onError(String errorMsg) {
+
+                            }
+
+                            @Override
+                            protected void onSuccess(String s) {
+                                responseTv.setText(s);
+                                showToast(s);
+                            }
+                        });
+                break;
+
+            case R.id.multiple_http:
+
+                RxHttpUtils
+                        .createApi(ApiService.class)
+                        .getBook()
+                        .flatMap(new Function<BookBean, ObservableSource<Top250Bean>>() {
+                            @Override
+                            public ObservableSource<Top250Bean> apply(@NonNull BookBean bookBean) throws Exception {
+                                return RxHttpUtils
+                                        .createApi(ApiService.class)
+                                        .getTop250(20);
+                            }
+                        })
+                        .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
+                        .subscribe(new CommonObserver<Top250Bean>() {
+                            @Override
+                            protected String setTag() {
+                                return "tag2";
+                            }
+
+                            @Override
+                            protected void onError(String errorMsg) {
+
+                            }
+
+                            @Override
+                            protected void onSuccess(Top250Bean top250Bean) {
+                                StringBuilder sb = new StringBuilder();
+                                sb.append(top250Bean.getTitle() + "\n");
+
+                                for (Top250Bean.SubjectsBean s : top250Bean.getSubjects()) {
+                                    sb.append(s.getTitle() + "\n");
+                                }
+                                responseTv.setText(sb.toString());
+                                //请求成功
+                                showToast(sb.toString());
+                            }
+                        });
+
+                break;
+            case R.id.download_http:
+                String url = "https://t.alipayobjects.com/L1/71/100/and/alipay_wap_main.apk";
+                final String fileName = "alipay.apk";
+                RxHttpUtils
+                        .downloadFile(url)
+                        .subscribe(new DownloadObserver(fileName) {
+                            //可以去下下载
+                            @Override
+                            protected String setTag() {
+                                return "download";
+                            }
+
+                            @Override
+                            protected void onError(String errorMsg) {
+                                download_cancel_http.setEnabled(false);
+                                download_http.setEnabled(true);
+                                download_http.setText("文件下载");
+                                showToast(errorMsg);
+                            }
+
+                            @Override
+                            protected void onSuccess(long bytesRead, long contentLength, float progress, boolean done, String filePath) {
+                                download_cancel_http.setEnabled(true);
+                                download_http.setText("下 载中：" + progress + "%");
+                                if (done) {
+                                    download_http.setEnabled(true);
+                                    download_http.setText("文件下载");
+                                    responseTv.setText("下载文件路径：" + filePath);
+
+                                }
+
+                            }
+                        });
+                download_http.setEnabled(false);
+                break;
+            case R.id.download_cancel_http:
+                RxHttpUtils.cancel("download");
+                break;
+            case R.id.upload_http:
+
+                RxPermissions permissions = new RxPermissions(this);
+                permissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(new Consumer<Boolean>() {
+                            @Override
+                            public void accept(Boolean aBoolean) throws Exception {
+                                if (aBoolean) {
+                                    // All requested permissions are granted
+                                    selectPhoto(1);
+                                } else {
+                                    // At least one permission is denied
+                                    showToast("请授权");
+                                }
+                            }
+                        });
+                break;
+            case R.id.upload_imgs:
+                RxPermissions permissions1 = new RxPermissions(this);
+                permissions1.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(new Consumer<Boolean>() {
+                            @Override
+                            public void accept(Boolean aBoolean) throws Exception {
+                                if (aBoolean) {
+                                    // All requested permissions are granted
+                                    selectPhoto(9);
+                                } else {
+                                    // At least one permission is denied
+                                    showToast("请授权");
+                                }
+                            }
+                        });
+                break;
+
             case R.id.single_http_default:
                 RxHttpUtils
                         .getSInstance()
@@ -95,7 +267,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .createSApi(ApiService.class)
                         .getTop250(5)
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                        .subscribe(new CommonObserver<Top250Bean>() {
+                            @Override
+                            protected String setTag() {
+                                return "tag4";
+                            }
+
                             @Override
                             protected void onError(String errorMsg) {
 
@@ -135,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
                         //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
                         //单个请求是否持久化cookie
-                        .saveCookie(true)
+                        .cookieType(new MemoryCookieStore())
                         //单个请求超时
                         .writeTimeout(10)
                         .readTimeout(10)
@@ -150,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //如果需要请求loading需要传入自己的loading_dialog
                         //使用loading的话需要在CommonObserver<XXX>(loading_dialog)中也传去
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
+                        .subscribe(new CommonObserver<Top250Bean>() {
                             //默认false
 //                            @Override
 //                            public boolean isHideToast() {
@@ -182,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .createSApi(ApiService.class)
                         .getBookString()
                         .compose(Transformer.<String>switchSchedulers(loading_dialog))
-                        .subscribe(new StringObserver(loading_dialog) {
+                        .subscribe(new StringObserver() {
                             //默认false   是否隐藏onError的提示
                             @Override
                             protected boolean isHideToast() {
@@ -202,149 +379,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         });
 
                 break;
-            case R.id.global_http:
-                RxHttpUtils
-                        .createApi(ApiService.class)
-                        .getBook()
-                        .compose(Transformer.<BookBean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<BookBean>(loading_dialog) {
 
-                            //默认false   隐藏onError的提示
-                            @Override
-                            protected boolean isHideToast() {
-                                return true;
-                            }
-
-                            @Override
-                            protected void onError(String errorMsg) {
-
-                            }
-
-                            @Override
-                            protected void onSuccess(BookBean bookBean) {
-                                String s = bookBean.getSummary();
-                                responseTv.setText(s);
-                                showToast(s);
-                            }
-                        });
-                break;
-            case R.id.global_string_http:
-                RxHttpUtils
-                        .createApi(ApiService.class)
-                        .getBookString()
-                        .compose(Transformer.<String>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<String>(loading_dialog) {
-                            @Override
-                            protected void onError(String errorMsg) {
-
-                            }
-
-                            @Override
-                            protected void onSuccess(String s) {
-                                responseTv.setText(s);
-                                showToast(s);
-                            }
-                        });
-                break;
-
-            case R.id.multiple_http:
-
-                RxHttpUtils
-                        .createApi(ApiService.class)
-                        .getBook()
-                        .flatMap(new Function<BookBean, ObservableSource<Top250Bean>>() {
-                            @Override
-                            public ObservableSource<Top250Bean> apply(@NonNull BookBean bookBean) throws Exception {
-                                return RxHttpUtils
-                                        .createApi(ApiService.class)
-                                        .getTop250(20);
-                            }
-                        })
-                        .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>(loading_dialog) {
-                            @Override
-                            protected void onError(String errorMsg) {
-
-                            }
-
-                            @Override
-                            protected void onSuccess(Top250Bean top250Bean) {
-                                StringBuilder sb = new StringBuilder();
-                                sb.append(top250Bean.getTitle() + "\n");
-
-                                for (Top250Bean.SubjectsBean s : top250Bean.getSubjects()) {
-                                    sb.append(s.getTitle() + "\n");
-                                }
-                                responseTv.setText(sb.toString());
-                                //请求成功
-                                showToast(sb.toString());
-                            }
-                        });
-
-                break;
-            case R.id.download_http:
-                String url = "https://t.alipayobjects.com/L1/71/100/and/alipay_wap_main.apk";
-                final String fileName = "alipay.apk";
-                RxHttpUtils
-                        .downloadFile(url)
-                        .subscribe(new DownloadObserver(fileName) {
-                            @Override
-                            protected void getDisposable(Disposable d) {
-                                disposables.add(d);
-                            }
-
-                            @Override
-                            protected void onError(String errorMsg) {
-                                download_http.setEnabled(true);
-                            }
-
-                            @Override
-                            protected void onSuccess(long bytesRead, long contentLength, float progress, boolean done, String filePath) {
-                                download_http.setText("下载中：" + progress + "%");
-                                if (done) {
-                                    download_http.setEnabled(true);
-                                    download_http.setText("文件下载");
-                                    responseTv.setText("下载文件路径：" + filePath);
-
-                                }
-
-                            }
-                        });
-                download_http.setEnabled(false);
-                break;
-            case R.id.upload_http:
-
-                RxPermissions permissions = new RxPermissions(this);
-                permissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        .subscribe(new Consumer<Boolean>() {
-                            @Override
-                            public void accept(Boolean aBoolean) throws Exception {
-                                if (aBoolean) {
-                                    // All requested permissions are granted
-                                    selectPhoto(1);
-                                } else {
-                                    // At least one permission is denied
-                                    showToast("请授权");
-                                }
-                            }
-                        });
-                break;
-            case R.id.upload_imgs:
-                RxPermissions permissions1 = new RxPermissions(this);
-                permissions1.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        .subscribe(new Consumer<Boolean>() {
-                            @Override
-                            public void accept(Boolean aBoolean) throws Exception {
-                                if (aBoolean) {
-                                    // All requested permissions are granted
-                                    selectPhoto(9);
-                                } else {
-                                    // At least one permission is denied
-                                    showToast("请授权");
-                                }
-                            }
-                        });
-                break;
             default:
         }
     }
@@ -359,7 +394,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         RxHttpUtils.uploadImg(uploadUrl, uploadPath)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
-                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                .subscribe(new CommonObserver<ResponseBody>() {
+
+                    @Override
+                    protected String setTag() {
+                        return "uploadImg";
+                    }
+
                     @Override
                     protected void onError(String errorMsg) {
                         Log.e("allen", "上传失败: " + errorMsg);
@@ -387,9 +428,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void uploadImgs(List<String> uploadPaths) {
 
-        RxHttpUtils.uploadImgs("http://t.xinhuo.com/index.php/Api/Pic/uploadPic", uploadPaths)
+        RxHttpUtils.uploadImages("http://t.xinhuo.com/index.php/Api/Pic/uploadPic", uploadPaths)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
-                .subscribe(new CommonObserver<ResponseBody>(loading_dialog) {
+                .subscribe(new CommonObserver<ResponseBody>() {
+
+                    @Override
+                    protected String setTag() {
+                        return "uploadImg";
+                    }
+
                     @Override
                     protected void onError(String errorMsg) {
                         Log.e("allen", "上传失败: " + errorMsg);
@@ -454,6 +501,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        RxHttpUtils.clearAllCompositeDisposable();
+        //取消某个请求
+        //RxHttpUtils.cancel("tag1");
+        //取消某些请求
+        //RxHttpUtils.cancel("tag1", "tag2", "download", "uploadImg");
+        ///取消所有请求
+        //RxHttpUtils.cancelAll();
     }
 }

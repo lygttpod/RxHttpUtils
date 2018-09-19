@@ -18,7 +18,7 @@ public class JsonUtil {
      */
     public static String formatJson(String jsonStr) {
         if (null == jsonStr || "".equals(jsonStr)) return "";
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         char last = '\0';
         char current = '\0';
         int indent = 0;
@@ -63,7 +63,7 @@ public class JsonUtil {
      * @param sb
      * @param indent
      */
-    private static void addIndentBlank(StringBuilder sb, int indent) {
+    private static void addIndentBlank(StringBuffer sb, int indent) {
         for (int i = 0; i < indent; i++) {
             sb.append('\t');
         }

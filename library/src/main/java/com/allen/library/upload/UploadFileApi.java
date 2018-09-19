@@ -20,18 +20,6 @@ import retrofit2.http.Url;
 
 public interface UploadFileApi {
 
-    /**
-     * 上传
-     *
-     * @param uploadUrl 地址
-     * @param file      文件
-     * @return ResponseBody
-     */
-    @Multipart
-    @POST
-    Observable<ResponseBody> uploadImg(@Url String uploadUrl,
-                                       @Part MultipartBody.Part file);
-
 
     /**
      * 上传多个文件
@@ -42,6 +30,6 @@ public interface UploadFileApi {
      */
     @Multipart
     @POST
-    Observable<ResponseBody> uploadImgs(@Url String uploadUrl,
-                                        @Part List<MultipartBody.Part> files);
+    Observable<ResponseBody> uploadFiles(@Url String uploadUrl,
+                                         @Part List<MultipartBody.Part> files);
 }

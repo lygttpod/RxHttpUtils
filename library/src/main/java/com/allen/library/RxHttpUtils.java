@@ -4,20 +4,21 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 
-import com.allen.library.constant.SPKeys;
+import com.allen.library.config.OkHttpConfig;
+import com.allen.library.cookie.CookieJarImpl;
+import com.allen.library.cookie.store.CookieStore;
 import com.allen.library.download.DownloadRetrofit;
 import com.allen.library.http.GlobalRxHttp;
 import com.allen.library.http.SingleRxHttp;
+import com.allen.library.manage.RxHttpManager;
 import com.allen.library.upload.UploadRetrofit;
-import com.allen.library.utils.SPUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
+import okhttp3.Cookie;
+import okhttp3.HttpUrl;
 import okhttp3.ResponseBody;
 
 /**
@@ -34,16 +35,11 @@ public class RxHttpUtils {
     @SuppressLint("StaticFieldLeak")
     private static Application context;
 
-    private static List<Disposable> disposables;
-    private static String networkData;
-    private static CompositeDisposable mCompositeDisposable;
-
     public static RxHttpUtils getInstance() {
         if (instance == null) {
             synchronized (RxHttpUtils.class) {
                 if (instance == null) {
                     instance = new RxHttpUtils();
-                    disposables = new ArrayList<>();
                 }
             }
 
@@ -99,9 +95,11 @@ public class RxHttpUtils {
 
     /**
      * 获取单个请求配置实例
+     * 后续版本即将移除---推荐使用全局配置的请求
      *
      * @return SingleRxHttp
      */
+    @Deprecated
     public static SingleRxHttp getSInstance() {
 
         return SingleRxHttp.getInstance();
@@ -111,8 +109,8 @@ public class RxHttpUtils {
     /**
      * 下载文件
      *
-     * @param fileUrl
-     * @return
+     * @param fileUrl 地址
+     * @return ResponseBody
      */
     public static Observable<ResponseBody> downloadFile(String fileUrl) {
         return DownloadRetrofit.downloadFile(fileUrl);
@@ -126,7 +124,7 @@ public class RxHttpUtils {
      * @return ResponseBody
      */
     public static Observable<ResponseBody> uploadImg(String uploadUrl, String filePath) {
-        return UploadRetrofit.uploadImg(uploadUrl, filePath);
+        return UploadRetrofit.uploadImage(uploadUrl, filePath);
     }
 
     /**
@@ -136,68 +134,92 @@ public class RxHttpUtils {
      * @param filePaths 文件路径
      * @return ResponseBody
      */
-    public static Observable<ResponseBody> uploadImgs(String uploadUrl, List<String> filePaths) {
-        return UploadRetrofit.uploadImgs(uploadUrl, filePaths);
+    public static Observable<ResponseBody> uploadImages(String uploadUrl, List<String> filePaths) {
+        return UploadRetrofit.uploadImages(uploadUrl, filePaths);
     }
 
     /**
-     * 获取Cookie
+     * 上传多张图片
      *
-     * @return HashSet
+     * @param uploadUrl 地址
+     * @param filePaths 文件路径
+     * @return ResponseBody
      */
-    public static HashSet<String> getCookie() {
-        HashSet<String> preferences = (HashSet<String>) SPUtils.get(SPKeys.COOKIE, new HashSet<String>());
-        return preferences;
-    }
-
     /**
-     * 获取disposable 在onDestroy方法中取消订阅disposable.dispose()
+     * 上传多张图片
      *
-     * @param disposable disposable
+     * @param uploadUrl 地址
+     * @param fileName  后台接收文件流的参数名
+     * @param paramsMap 参数
+     * @param filePaths 文件路径
+     * @return ResponseBody
      */
-    public static void addDisposable(Disposable disposable) {
-        if (disposables != null) {
-            disposables.add(disposable);
-        }
+    public static Observable<ResponseBody> uploadImagesWithParams(String uploadUrl, String fileName, Map<String, Object> paramsMap, List<String> filePaths) {
+        return UploadRetrofit.uploadFilesWithParams(uploadUrl, fileName, paramsMap, filePaths);
     }
 
     /**
-     * 添加订阅
+     * 获取全局的CookieJarImpl实例
      */
-    public static void addToCompositeDisposable(Disposable mDisposable) {
-        if (mCompositeDisposable == null) {
-            mCompositeDisposable = new CompositeDisposable();
-        }
-        mCompositeDisposable.add(mDisposable);
+    private static CookieJarImpl getCookieJar() {
+        return (CookieJarImpl) OkHttpConfig.getOkHttpClient().cookieJar();
+    }
+
+    /**
+     * 获取全局的CookieStore实例
+     */
+    private static CookieStore getCookieStore() {
+        return getCookieJar().getCookieStore();
+    }
+
+    /**
+     * 获取所有cookie
+     */
+    public static List<Cookie> getAllCookie() {
+        CookieStore cookieStore = getCookieStore();
+        List<Cookie> allCookie = cookieStore.getAllCookie();
+        return allCookie;
+    }
+
+    /**
+     * 获取某个url所对应的全部cookie
+     */
+    public static List<Cookie> getCookieByUrl(String url) {
+        CookieStore cookieStore = getCookieStore();
+        HttpUrl httpUrl = HttpUrl.parse(url);
+        List<Cookie> cookies = cookieStore.getCookie(httpUrl);
+        return cookies;
+    }
+
+
+    /**
+     * 移除全部cookie
+     */
+    public static void removeAllCookie() {
+        CookieStore cookieStore = getCookieStore();
+        cookieStore.removeAllCookie();
+    }
+
+    /**
+     * 移除某个url下的全部cookie
+     */
+    public static void removeCookieByUrl(String url) {
+        HttpUrl httpUrl = HttpUrl.parse(url);
+        CookieStore cookieStore = getCookieStore();
+        cookieStore.removeCookie(httpUrl);
     }
 
     /**
      * 取消所有请求
      */
-    public static void cancelAllRequest() {
-        if (disposables != null) {
-            for (Disposable disposable : disposables) {
-                disposable.dispose();
-            }
-            disposables.clear();
-        }
+    public static void cancelAll() {
+        RxHttpManager.get().cancelAll();
     }
 
     /**
-     * 取消所有订阅
+     * 取消某个或某些请求
      */
-    public static void clearAllCompositeDisposable() {
-        if (mCompositeDisposable != null) {
-            mCompositeDisposable.clear();
-        }
-    }
-
-    /**
-     * 取消单个请求
-     */
-    public static void cancelSingleRequest(Disposable disposable) {
-        if (disposable != null && !disposable.isDisposed()) {
-            disposable.dispose();
-        }
+    public static void cancel(Object... tag) {
+        RxHttpManager.get().cancel(tag);
     }
 }

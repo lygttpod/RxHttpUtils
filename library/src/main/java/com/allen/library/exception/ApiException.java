@@ -2,12 +2,10 @@ package com.allen.library.exception;
 
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializer;
-import com.google.gson.JsonSyntaxException;
 
 import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONException;
 
-import java.io.IOException;
 import java.io.NotSerializableException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -18,8 +16,8 @@ import retrofit2.HttpException;
 
 /**
  * @author Allen
- *         Created by Allen on 2017/10/23.
- *         异常类型
+ * Created by Allen on 2017/10/23.
+ * 异常类型
  */
 
 public class ApiException extends Exception {
@@ -47,59 +45,42 @@ public class ApiException extends Exception {
         if (e instanceof HttpException) {
             HttpException httpException = (HttpException) e;
             ex = new ApiException(httpException, httpException.code());
-            try {
-                ex.message = httpException.response().errorBody().string();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                ex.message = e1.getMessage();
-            }
-            return ex;
+            ex.message = httpException.getMessage();
         } else if (e instanceof SocketTimeoutException) {
             ex = new ApiException(e, ERROR.TIMEOUT_ERROR);
             ex.message = "网络连接超时，请检查您的网络状态，稍后重试！";
-            return ex;
         } else if (e instanceof ConnectException) {
             ex = new ApiException(e, ERROR.TIMEOUT_ERROR);
             ex.message = "网络连接异常，请检查您的网络状态，稍后重试！";
-            return ex;
         } else if (e instanceof ConnectTimeoutException) {
             ex = new ApiException(e, ERROR.TIMEOUT_ERROR);
             ex.message = "网络连接超时，请检查您的网络状态，稍后重试！";
-            return ex;
         } else if (e instanceof UnknownHostException) {
             ex = new ApiException(e, ERROR.TIMEOUT_ERROR);
             ex.message = "网络连接异常，请检查您的网络状态，稍后重试！";
-            return ex;
         } else if (e instanceof NullPointerException) {
             ex = new ApiException(e, ERROR.NULL_POINTER_EXCEPTION);
             ex.message = "空指针异常";
-            return ex;
         } else if (e instanceof javax.net.ssl.SSLHandshakeException) {
             ex = new ApiException(e, ERROR.SSL_ERROR);
             ex.message = "证书验证失败";
-            return ex;
         } else if (e instanceof ClassCastException) {
             ex = new ApiException(e, ERROR.CAST_ERROR);
             ex.message = "类型转换错误";
-            return ex;
         } else if (e instanceof JsonParseException
                 || e instanceof JSONException
-                || e instanceof JsonSyntaxException
                 || e instanceof JsonSerializer
                 || e instanceof NotSerializableException
                 || e instanceof ParseException) {
             ex = new ApiException(e, ERROR.PARSE_ERROR);
             ex.message = "解析错误";
-            return ex;
         } else if (e instanceof IllegalStateException) {
             ex = new ApiException(e, ERROR.ILLEGAL_STATE_ERROR);
             ex.message = e.getMessage();
-            return ex;
         } else {
             ex = new ApiException(e, ERROR.UNKNOWN);
-            ex.message = "未知错误";
-            return ex;
         }
+        return ex;
     }
 
     /**
