@@ -1,6 +1,7 @@
 package com.allen.rxhttputils;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.Intent;
@@ -31,6 +32,7 @@ import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zxy.tiny.Tiny;
 import com.zxy.tiny.callback.FileCallback;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,9 @@ import io.reactivex.ObservableSource;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
@@ -54,7 +59,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView responseTv;
 
     private int REQUEST_CODE_CHOOSE = 1;
-    private String uploadUrl = "http://server.jeasonlzy.com/OkHttpUtils/upload";
+    private String UPLOAD_URL = "http://t.xinhuo.com/index.php/Api/Pic/uploadPic";
+    private RxPermissions permissions;
+    private int MAX_SELECTABLE = 1;
+    private boolean IS_USE_GLOBAL_CONFIG = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +79,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         download_cancel_http = (Button) findViewById(R.id.download_cancel_http);
         findViewById(R.id.download_http).setOnClickListener(this);
         findViewById(R.id.download_cancel_http).setOnClickListener(this);
-        findViewById(R.id.upload_http).setOnClickListener(this);
-        findViewById(R.id.upload_imgs).setOnClickListener(this);
+        findViewById(R.id.upload_one_pic).setOnClickListener(this);
+        findViewById(R.id.upload_more_pic).setOnClickListener(this);
+        findViewById(R.id.upload_pic_with_global_config).setOnClickListener(this);
         findViewById(R.id.global_string_http).setOnClickListener(this);
+
+        permissions = new RxPermissions(this);
 
     }
 
@@ -226,40 +237,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.download_cancel_http:
                 RxHttpUtils.cancel("download");
                 break;
-            case R.id.upload_http:
-
-                RxPermissions permissions = new RxPermissions(this);
-                permissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        .subscribe(new Consumer<Boolean>() {
-                            @Override
-                            public void accept(Boolean aBoolean) throws Exception {
-                                if (aBoolean) {
-                                    // All requested permissions are granted
-                                    selectPhoto(1);
-                                } else {
-                                    // At least one permission is denied
-                                    showToast("请授权");
-                                }
-                            }
-                        });
+            case R.id.upload_one_pic:
+                MAX_SELECTABLE = 1;
+                IS_USE_GLOBAL_CONFIG = false;
+                selectPhotoWithPermission(MAX_SELECTABLE);
                 break;
-            case R.id.upload_imgs:
-                RxPermissions permissions1 = new RxPermissions(this);
-                permissions1.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        .subscribe(new Consumer<Boolean>() {
-                            @Override
-                            public void accept(Boolean aBoolean) throws Exception {
-                                if (aBoolean) {
-                                    // All requested permissions are granted
-                                    selectPhoto(9);
-                                } else {
-                                    // At least one permission is denied
-                                    showToast("请授权");
-                                }
-                            }
-                        });
+            case R.id.upload_more_pic:
+                MAX_SELECTABLE = 9;
+                IS_USE_GLOBAL_CONFIG = false;
+                selectPhotoWithPermission(MAX_SELECTABLE);
                 break;
-
+            case R.id.upload_pic_with_global_config:
+                MAX_SELECTABLE = 9;
+                IS_USE_GLOBAL_CONFIG = true;
+                selectPhotoWithPermission(MAX_SELECTABLE);
+                break;
             case R.id.single_http_default:
                 RxHttpUtils
                         .getSInstance()
@@ -384,6 +376,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @SuppressLint("CheckResult")
+    private void selectPhotoWithPermission(final int maxSelectable) {
+        permissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean aBoolean) throws Exception {
+                        if (aBoolean) {
+                            // All requested permissions are granted
+                            selectPhoto(maxSelectable);
+                        } else {
+                            // At least one permission is denied
+                            showToast("请授权");
+                        }
+                    }
+                });
+    }
+
+    /**
+     * 使用全局配置上传图片  demo
+     *
+     * @param filePaths 图片路径
+     */
+    private void uploadImgWithGlobalConfig(List<String> filePaths) {
+
+        //以下使用的是全局配置
+        RxHttpUtils.createApi(ApiService.class)
+                .uploadFiles(UPLOAD_URL, getMultipartPart("uploaded_file", null, filePaths))
+                .compose(Transformer.<String>switchSchedulers(loading_dialog))
+                .subscribe(new StringObserver() {
+
+                    @Override
+                    protected String setTag() {
+                        return "uploadImg";
+                    }
+
+                    @Override
+                    protected void onError(String errorMsg) {
+
+                    }
+
+                    @Override
+                    protected void onSuccess(String data) {
+                        showToast(data);
+                        Log.e("allen", "上传完毕: " + data);
+                    }
+                });
+    }
+
+    /**
+     * 可以根据需求自行修改(这里只是简单demo示例)
+     *
+     * @param fileName  后台协定的接受图片的name（没特殊要求就可以随便写）
+     * @param paramsMap 普通参数 图文混合参数
+     * @param filePaths 图片路径
+     * @return List<MultipartBody.Part>
+     */
+    private List<MultipartBody.Part> getMultipartPart(String fileName, Map<String, Object> paramsMap, List<String> filePaths) {
+        MultipartBody.Builder builder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM);
+
+        if (null != paramsMap) {
+            for (String key : paramsMap.keySet()) {
+                builder.addFormDataPart(key, (String) paramsMap.get(key));
+            }
+        }
+
+        for (int i = 0; i < filePaths.size(); i++) {
+            File file = new File(filePaths.get(i));
+            RequestBody imageBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+            //"fileName"+i 后台接收图片流的参数名
+            builder.addFormDataPart(fileName, file.getName(), imageBody);
+        }
+
+        List<MultipartBody.Part> parts = builder.build().parts();
+
+        return parts;
+    }
+
     /**
      * 上传单张图片
      *
@@ -428,7 +498,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void uploadImgs(List<String> uploadPaths) {
 
-        RxHttpUtils.uploadImages("http://t.xinhuo.com/index.php/Api/Pic/uploadPic", uploadPaths)
+        RxHttpUtils.uploadImages(UPLOAD_URL, uploadPaths)
                 .compose(Transformer.<ResponseBody>switchSchedulers(loading_dialog))
                 .subscribe(new CommonObserver<ResponseBody>() {
 
@@ -490,7 +560,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void callback(boolean isSuccess, String outfile, Throwable t) {
                         paths.add(outfile);
                         if (paths.size() == mSelected.size()) {
-                            uploadImgs(paths);
+                            if (IS_USE_GLOBAL_CONFIG) {
+                                uploadImgWithGlobalConfig(paths);
+                            } else {
+                                uploadImgs(paths);
+                            }
                         }
                     }
                 });

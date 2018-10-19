@@ -36,23 +36,30 @@
             android:text="文件下载" />
 
         <Button
-            android:enabled="false"
             android:id="@+id/download_cancel_http"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:text="取消下载" />
 
+
         <Button
-            android:id="@+id/upload_http"
+            android:id="@+id/upload_one_pic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="上传单张图片" />
 
         <Button
-            android:id="@+id/upload_imgs"
+            android:id="@+id/upload_more_pic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="上传多张图片" />
+
+        <Button
+            android:id="@+id/upload_pic_with_global_config"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="使用全局配置-上传图片" />
 
         <TextView
             android:layout_width="match_parent"
