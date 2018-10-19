@@ -3,14 +3,13 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.lygttpod'
 android {
-    compileSdkVersion 24
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 24
-        versionCode 216
-        versionName "2.1.6"
+        targetSdkVersion 27
+        versionCode 217
+        versionName "2.1.7"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 

@@ -245,18 +245,25 @@ public class SingleRxHttp {
             singleOkHttpBuilder.cookieJar(new CookieJarImpl(cookieStore));
         }
 
+
         if (cache) {
-            Cache cache;
+            Cache cache = null;
             if (!TextUtils.isEmpty(cachePath) && cacheMaxSize > 0) {
                 cache = new Cache(new File(cachePath), cacheMaxSize);
             } else {
-                cache = new Cache(new File(RxHttpUtils.getContext().getExternalCacheDir().getPath() + "/RxHttpCacheData")
-                        , 1024 * 1024 * 100);
+                File externalCacheDir = RxHttpUtils.getContext().getExternalCacheDir();
+                if (null != externalCacheDir) {
+                    cache = new Cache(new File(externalCacheDir.getPath() + "/RxHttpCacheData")
+                            , 1024 * 1024 * 100);
+                }
+
             }
-            singleOkHttpBuilder
-                    .cache(cache)
-                    .addInterceptor(new NoNetCacheInterceptor())
-                    .addNetworkInterceptor(new NetCacheInterceptor());
+            if (null != cache) {
+                singleOkHttpBuilder
+                        .cache(cache)
+                        .addInterceptor(new NoNetCacheInterceptor())
+                        .addNetworkInterceptor(new NetCacheInterceptor());
+            }
         }
 
         if (sslParams != null) {
