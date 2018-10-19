@@ -170,7 +170,7 @@ b、
         RxHttpUtils.createApi(ApiServer.class)
                 .geTestData()
                 .compose(Transformer.<String>switchSchedulers())
-                .subscribe(new DataObserver<String>() {
+                .subscribe(new StringObserver<String>() {
                     @Override
                     protected void onError(String errorMsg) {
 
