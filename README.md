@@ -19,7 +19,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.1.7'
+        compile 'com.github.lygttpod:RxHttpUtils:2.1.8'
         }
 ```
 
@@ -525,6 +525,9 @@ b、
 
 
 # 更新日志
+
+### V2.1.8
+* 修复调用RxHttpUtils.canceAll()报ConcurrentModificationException异常的bug
 
 ### V2.1.7
 * 修复getExternalCacheDir获取空指针异常的问题
