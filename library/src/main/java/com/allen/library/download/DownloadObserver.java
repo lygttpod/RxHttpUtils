@@ -1,10 +1,8 @@
 package com.allen.library.download;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 
 import com.allen.library.manage.RxHttpManager;
-import com.allen.library.observer.CommonObserver;
 
 import java.io.IOException;
 
@@ -28,9 +26,15 @@ import okhttp3.ResponseBody;
 public abstract class DownloadObserver extends BaseDownloadObserver {
 
     private String fileName;
+    private String destFileDir;
 
     public DownloadObserver(String fileName) {
         this.fileName = fileName;
+    }
+
+    public DownloadObserver(String fileName, String destFileDir) {
+        this.fileName = fileName;
+        this.destFileDir = destFileDir;
     }
 
 
@@ -95,7 +99,7 @@ public abstract class DownloadObserver extends BaseDownloadObserver {
                     @Override
                     public void onNext(ResponseBody responseBody) {
                         try {
-                            new DownloadManager().saveFile(responseBody, fileName, new ProgressListener() {
+                            new DownloadManager().saveFile(responseBody, fileName, destFileDir, new ProgressListener() {
                                 @Override
                                 public void onResponseProgress(final long bytesRead, final long contentLength, final int progress, final boolean done, final String filePath) {
                                     Observable

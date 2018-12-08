@@ -204,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final String fileName = "alipay.apk";
                 RxHttpUtils
                         .downloadFile(url)
+                        //.subscribe(new DownloadObserver(fileName,destFileDir) 其中 destFileDir是自定义下载存储路径
                         .subscribe(new DownloadObserver(fileName) {
                             //可以去下下载
                             @Override

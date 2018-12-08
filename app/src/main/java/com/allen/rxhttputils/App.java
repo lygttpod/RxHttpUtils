@@ -6,11 +6,15 @@ import android.app.Application;
 import com.allen.library.RxHttpUtils;
 import com.allen.library.config.OkHttpConfig;
 import com.allen.library.cookie.store.SPCookieStore;
+import com.allen.library.gson.GsonAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 
 /**
@@ -96,6 +100,9 @@ public class App extends Application {
                 .getInstance()
                 .init(this)
                 .config()
+                //自定义factory的用法
+                //.setCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                //.setConverterFactory(ScalarsConverterFactory.create(),GsonConverterFactory.create(GsonAdapter.buildGson()))
                 //配置全局baseUrl
                 .setBaseUrl("https://api.douban.com/")
                 //开启全局配置

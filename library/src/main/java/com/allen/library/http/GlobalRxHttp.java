@@ -1,8 +1,12 @@
 package com.allen.library.http;
 
+import com.allen.library.config.RetrofitConfig;
+
 import java.util.HashMap;
 
 import okhttp3.OkHttpClient;
+import retrofit2.CallAdapter;
+import retrofit2.Converter;
 import retrofit2.Retrofit;
 
 /**
@@ -37,6 +41,34 @@ public class GlobalRxHttp {
 
         }
         return instance;
+    }
+
+    /**
+     * 为Retrofit设置CallAdapterFactory
+     * 注意：需在调用SetBaseUrl之前调用
+     *
+     * @param factories callAdapterFactory
+     * @return CallAdapterFactory[]
+     */
+    public GlobalRxHttp setCallAdapterFactory(CallAdapter.Factory... factories) {
+        if (null != factories) {
+            RetrofitConfig.getInstance().addCallAdapterFactory(factories);
+        }
+        return this;
+    }
+
+    /**
+     * 为Retrofit设置ConverterFactory
+     * 注意：需在调用SetBaseUrl之前调用
+     *
+     * @param factories converterFactory
+     * @return ConverterFactory[]
+     */
+    public GlobalRxHttp setConverterFactory(Converter.Factory... factories) {
+        if (null != factories) {
+            RetrofitConfig.getInstance().addConverterFactory(factories);
+        }
+        return this;
     }
 
     /**

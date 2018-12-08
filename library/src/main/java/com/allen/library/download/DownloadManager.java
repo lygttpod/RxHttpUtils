@@ -15,7 +15,7 @@ import okhttp3.ResponseBody;
  * <p>
  *
  * @author Allen
- *         保存下载的文件
+ * 保存下载的文件
  */
 
 public class DownloadManager {
@@ -26,12 +26,13 @@ public class DownloadManager {
      *
      * @param response     ResponseBody
      * @param destFileName 文件名（包括文件后缀）
+     * @param destFileDir  文件下载路径
      * @return 返回
      * @throws IOException
      */
-    public File saveFile(ResponseBody response, final String destFileName, ProgressListener progressListener) throws IOException {
+    public File saveFile(ResponseBody response, String destFileName, String destFileDir, ProgressListener progressListener) throws IOException {
 
-        String destFileDir = RxHttpUtils.getContext().getExternalFilesDir(null) + File.separator;
+        String defaultDestFileDir = RxHttpUtils.getContext().getExternalFilesDir(null) + File.separator;
 
         long contentLength = response.contentLength();
         InputStream is = null;
@@ -43,7 +44,8 @@ public class DownloadManager {
 
             long sum = 0;
 
-            File dir = new File(destFileDir);
+            File dir = new File(null == destFileDir ? defaultDestFileDir : destFileDir);
+
             if (!dir.exists()) {
                 dir.mkdirs();
             }
