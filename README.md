@@ -19,7 +19,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.1.8'
+        compile 'com.github.lygttpod:RxHttpUtils:2.1.9'
         }
 ```
 
@@ -70,6 +70,9 @@ public class MyApplication extends Application {
                 .getInstance()
                 .init(this)
                 .config()
+                //使用自定义factory的用法
+                //.setCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                //.setConverterFactory(ScalarsConverterFactory.create(),GsonConverterFactory.create(GsonAdapter.buildGson()))
                 //配置全局baseUrl
                 .setBaseUrl("https://api.douban.com/")
                 //开启全局配置
@@ -301,6 +304,7 @@ b、
 
                 RxHttpUtils
                         .downloadFile(url)
+                         //.subscribe(new DownloadObserver(fileName,destFileDir) 其中 destFileDir是自定义下载存储路径
                         .subscribe(new DownloadObserver(fileName) {
                             //可以通过配置tag用于取消下载请求
                             @Override
@@ -525,6 +529,29 @@ b、
 
 
 # 更新日志
+
+### V2.1.9
+* 新增自定义下载路径的配置方法
+```
+                RxHttpUtils
+                        .downloadFile(url)
+                        //.subscribe(new DownloadObserver(fileName,destFileDir) 其中 destFileDir是自定义下载存储路径
+                        .subscribe(new DownloadObserver(fileName) 
+```
+* 新增全局配置自定义Retrofit的Factory方法
+```
+        RxHttpUtils
+                .getInstance()
+                .init(this)
+                .config()
+                //自定义factory的用法(在setBaseUrl之前配置)
+                //.setCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                //.setConverterFactory(ScalarsConverterFactory.create(),GsonConverterFactory.create(GsonAdapter.buildGson()))
+                //配置全局baseUrl
+                .setBaseUrl("https://api.douban.com/")
+                //开启全局配置
+                .setOkClient(okHttpClient);
+```
 
 ### V2.1.8
 * 修复调用RxHttpUtils.canceAll()报ConcurrentModificationException异常的bug
