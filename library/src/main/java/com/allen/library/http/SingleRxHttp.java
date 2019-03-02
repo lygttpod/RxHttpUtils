@@ -44,6 +44,8 @@ public class SingleRxHttp {
     private boolean cache = false;
     private CookieStore cookieStore;
 
+    private int cacheTime = 60;
+    private int noNetCacheTime = 3600;
     private String cachePath;
     private long cacheMaxSize;
 
@@ -105,6 +107,16 @@ public class SingleRxHttp {
 
     public SingleRxHttp cache(boolean cache) {
         this.cache = cache;
+        return this;
+    }
+
+    public SingleRxHttp hasNetCacheTime(int cacheTime) {
+        this.cacheTime = cacheTime;
+        return this;
+    }
+
+    public SingleRxHttp noNetCacheTime(int noNetCacheTime) {
+        this.noNetCacheTime = noNetCacheTime;
         return this;
     }
 
@@ -261,8 +273,8 @@ public class SingleRxHttp {
             if (null != cache) {
                 singleOkHttpBuilder
                         .cache(cache)
-                        .addInterceptor(new NoNetCacheInterceptor())
-                        .addNetworkInterceptor(new NetCacheInterceptor());
+                        .addInterceptor(new NoNetCacheInterceptor(noNetCacheTime))
+                        .addNetworkInterceptor(new NetCacheInterceptor(cacheTime));
             }
         }
 

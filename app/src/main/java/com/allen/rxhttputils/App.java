@@ -6,15 +6,11 @@ import android.app.Application;
 import com.allen.library.RxHttpUtils;
 import com.allen.library.config.OkHttpConfig;
 import com.allen.library.cookie.store.SPCookieStore;
-import com.allen.library.gson.GsonAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 
 /**
@@ -74,6 +70,7 @@ public class App extends Application {
                 //1、在有网络的时候，先去读缓存，缓存时间到了，再去访问网络获取数据；
                 //2、在没有网络的时候，去读缓存中的数据。
                 .setCache(true)
+                .setHasNetCacheTime(10)//默认有网络时候缓存60秒
                 //全局持久话cookie,保存到内存（new MemoryCookieStore()）或者保存到本地（new SPCookieStore(this)）
                 //不设置的话，默认不对cookie做处理
                 .setCookieType(new SPCookieStore(this))

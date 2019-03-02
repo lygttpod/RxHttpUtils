@@ -19,6 +19,15 @@ import static com.allen.library.utils.NetUtils.isNetworkConnected;
  */
 
 public class NoNetCacheInterceptor implements Interceptor {
+    /**
+     * 无网络缓存时间3600秒
+     */
+    private int noNetCacheTime;
+
+    public NoNetCacheInterceptor(int noNetCacheTime) {
+        this.noNetCacheTime = noNetCacheTime;
+    }
+
     @Override
     public Response intercept(Chain chain) throws IOException {
 
@@ -41,7 +50,7 @@ public class NoNetCacheInterceptor implements Interceptor {
             }
 
             return response.newBuilder()
-                    .header("Cache-Control", "public, only-if-cached, max-stale=3600")
+                    .header("Cache-Control", "public, only-if-cached, max-stale="+noNetCacheTime)
                     .removeHeader("Pragma")
                     .build();
         }

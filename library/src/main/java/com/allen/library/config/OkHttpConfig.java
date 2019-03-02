@@ -71,6 +71,8 @@ public class OkHttpConfig {
         private Map<String, Object> headerMaps;
         private boolean isDebug;
         private boolean isCache;
+        private int cacheTime = 60;
+        private int noNetCacheTime = 10;
         private String cachePath;
         private long cacheMaxSize;
         private CookieStore cookieStore;
@@ -98,6 +100,16 @@ public class OkHttpConfig {
 
         public Builder setCache(boolean isCache) {
             this.isCache = isCache;
+            return this;
+        }
+
+        public Builder setHasNetCacheTime(int cacheTime) {
+            this.cacheTime = cacheTime;
+            return this;
+        }
+
+        public Builder setNoNetCacheTime(int noNetCacheTime) {
+            this.noNetCacheTime = noNetCacheTime;
             return this;
         }
 
@@ -217,10 +229,11 @@ public class OkHttpConfig {
                 } else {
                     cache = new Cache(new File(defaultCachePath), defaultCacheSize);
                 }
+
                 okHttpClientBuilder
                         .cache(cache)
-                        .addInterceptor(new NoNetCacheInterceptor())
-                        .addNetworkInterceptor(new NetCacheInterceptor());
+                        .addInterceptor(new NoNetCacheInterceptor(noNetCacheTime))
+                        .addNetworkInterceptor(new NetCacheInterceptor(cacheTime));
             }
         }
 
