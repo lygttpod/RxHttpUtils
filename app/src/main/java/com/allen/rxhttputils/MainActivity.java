@@ -3,13 +3,11 @@ package com.allen.rxhttputils;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -20,11 +18,13 @@ import com.allen.library.RxHttpUtils;
 import com.allen.library.cookie.store.MemoryCookieStore;
 import com.allen.library.download.DownloadObserver;
 import com.allen.library.interceptor.Transformer;
+import com.allen.library.interfaces.ILoadingView;
 import com.allen.library.observer.CommonObserver;
 import com.allen.library.observer.StringObserver;
 import com.allen.rxhttputils.api.ApiService;
 import com.allen.rxhttputils.bean.BookBean;
 import com.allen.rxhttputils.bean.Top250Bean;
+import com.allen.rxhttputils.widget.LoadingDialog;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
@@ -55,7 +55,7 @@ import static com.allen.library.utils.ToastUtils.showToast;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button download_http, download_cancel_http;
-    private Dialog loading_dialog;
+    private ILoadingView loading_dialog;
     private TextView responseTv;
 
     private int REQUEST_CODE_CHOOSE = 1;
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loading_dialog = new AlertDialog.Builder(this).setMessage("loading...").create();
+        loading_dialog = new LoadingDialog(this);
         setContentView(R.layout.activity_main);
         responseTv = (TextView) findViewById(R.id.response_tv);
         findViewById(R.id.single_http_default).setOnClickListener(this);
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 RxHttpUtils
                         .createApi(ApiService.class)
                         .getBook()
-                        .compose(Transformer.<BookBean>switchSchedulers(loading_dialog))
+                        .compose(Transformer.<BookBean>switchSchedulers( loading_dialog))
                         .subscribe(new CommonObserver<BookBean>() {
 
                             //默认false   隐藏onError的提示
