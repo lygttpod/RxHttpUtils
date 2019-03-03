@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 218
-        versionName "2.1.9"
+        versionCode 220
+        versionName "2.2.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -29,5 +29,5 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.4.0'
     compile 'com.squareup.retrofit2:converter-scalars:2.4.0'
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.8.0'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
 }

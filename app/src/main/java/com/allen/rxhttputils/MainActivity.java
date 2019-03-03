@@ -18,6 +18,7 @@ import com.allen.library.RxHttpUtils;
 import com.allen.library.cookie.store.MemoryCookieStore;
 import com.allen.library.download.DownloadObserver;
 import com.allen.library.interceptor.Transformer;
+import com.allen.library.interfaces.BuildHeadersListener;
 import com.allen.library.interfaces.ILoadingView;
 import com.allen.library.observer.CommonObserver;
 import com.allen.library.observer.StringObserver;
@@ -93,18 +94,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         responseTv.setText("");
 
-        Map<String, Object> headerMaps = new TreeMap<>();
-
-        headerMaps.put("header1", "header1");
-        headerMaps.put("header2", "header2");
-
         switch (v.getId()) {
 
             case R.id.global_http:
                 RxHttpUtils
                         .createApi(ApiService.class)
                         .getBook()
-                        .compose(Transformer.<BookBean>switchSchedulers( loading_dialog))
+                        .compose(Transformer.<BookBean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<BookBean>() {
 
                             //默认false   隐藏onError的提示
@@ -292,7 +288,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //单个请求的baseUrl
                         .baseUrl("https://api.douban.com/")
                         //单个请求的header
-                        .addHeaders(headerMaps)
+                        .addHeaders(new BuildHeadersListener() {
+                            @Override
+                            public Map<String, String> buildHeaders() {
+                                Map<String, String> headerMaps = new TreeMap<>();
+                                headerMaps.put("header1", "header1");
+                                headerMaps.put("header2", "header2");
+                                return headerMaps;
+                            }
+                        })
                         //单个请求是否开启缓存
                         .cache(true)
                         //单个请求的缓存路径及缓存大小，不设置的话有默认值

@@ -6,7 +6,9 @@ import android.app.Application;
 import com.allen.library.RxHttpUtils;
 import com.allen.library.config.OkHttpConfig;
 import com.allen.library.cookie.store.SPCookieStore;
+import com.allen.library.interfaces.BuildHeadersListener;
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,8 +23,6 @@ import okhttp3.OkHttpClient;
  */
 
 public class App extends Application {
-
-    private Map<String, Object> headerMaps = new HashMap<>();
 
     @Override
     public void onCreate() {
@@ -64,8 +64,20 @@ public class App extends Application {
 
         OkHttpClient okHttpClient = new OkHttpConfig
                 .Builder(this)
-                //全局的请求头信息
-                .setHeaders(headerMaps)
+                //添加公共请求头
+                .setHeaders(new BuildHeadersListener() {
+                    @Override
+                    public Map<String, String> buildHeaders() {
+                        HashMap<String, String> hashMap = new HashMap<>();
+                        hashMap.put("appVersion", BuildConfig.VERSION_NAME);
+                        hashMap.put("client", "android");
+                        hashMap.put("token", "your_token");
+                        hashMap.put("other_header", URLEncoder.encode("中文需要转码"));
+                        return hashMap;
+                    }
+                })
+                //添加自定义拦截器
+                //.setAddInterceptor()
                 //开启缓存策略(默认false)
                 //1、在有网络的时候，先去读缓存，缓存时间到了，再去访问网络获取数据；
                 //2、在没有网络的时候，去读缓存中的数据。

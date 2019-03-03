@@ -9,11 +9,11 @@ import com.allen.library.interceptor.HeaderInterceptor;
 import com.allen.library.interceptor.NetCacheInterceptor;
 import com.allen.library.interceptor.NoNetCacheInterceptor;
 import com.allen.library.interceptor.RxHttpLogger;
+import com.allen.library.interfaces.BuildHeadersListener;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +38,7 @@ public class SingleRxHttp {
 
     private String baseUrl;
 
-    private Map<String, Object> headerMaps = new HashMap<>();
+    private BuildHeadersListener buildHeadersListener;
 
     private boolean isShowLog = true;
     private boolean cache = false;
@@ -95,8 +95,8 @@ public class SingleRxHttp {
         return this;
     }
 
-    public SingleRxHttp addHeaders(Map<String, Object> headerMaps) {
-        this.headerMaps = headerMaps;
+    public SingleRxHttp addHeaders(BuildHeadersListener buildHeadersListener) {
+        this.buildHeadersListener = buildHeadersListener;
         return this;
     }
 
@@ -289,8 +289,14 @@ public class SingleRxHttp {
         singleOkHttpBuilder.connectTimeout(connectTimeout > 0 ? connectTimeout : 10, TimeUnit.SECONDS);
         singleOkHttpBuilder.retryOnConnectionFailure(true);
 
-        singleOkHttpBuilder.addInterceptor(new HeaderInterceptor(headerMaps));
-
+        if (buildHeadersListener != null) {
+            singleOkHttpBuilder.addInterceptor(new HeaderInterceptor() {
+                @Override
+                public Map<String, String> buildHeaders() {
+                    return buildHeadersListener.buildHeaders();
+                }
+            });
+        }
 
         if (isShowLog) {
             HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RxHttpLogger());

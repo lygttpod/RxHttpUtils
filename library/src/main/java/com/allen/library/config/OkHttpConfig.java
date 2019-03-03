@@ -11,6 +11,7 @@ import com.allen.library.interceptor.HeaderInterceptor;
 import com.allen.library.interceptor.NetCacheInterceptor;
 import com.allen.library.interceptor.NoNetCacheInterceptor;
 import com.allen.library.interceptor.RxHttpLogger;
+import com.allen.library.interfaces.BuildHeadersListener;
 
 import java.io.File;
 import java.io.InputStream;
@@ -68,7 +69,6 @@ public class OkHttpConfig {
 
     public static class Builder {
         public Context context;
-        private Map<String, Object> headerMaps;
         private boolean isDebug;
         private boolean isCache;
         private int cacheTime = 60;
@@ -83,13 +83,14 @@ public class OkHttpConfig {
         private String password;
         private InputStream[] certificates;
         private Interceptor[] interceptors;
+        private BuildHeadersListener buildHeadersListener;
 
         public Builder(Context context) {
             this.context = context;
         }
 
-        public Builder setHeaders(Map<String, Object> headerMaps) {
-            this.headerMaps = headerMaps;
+        public Builder setHeaders(BuildHeadersListener buildHeadersListener) {
+            this.buildHeadersListener = buildHeadersListener;
             return this;
         }
 
@@ -201,7 +202,15 @@ public class OkHttpConfig {
          * 配置headers
          */
         private void setHeadersConfig() {
-            okHttpClientBuilder.addInterceptor(new HeaderInterceptor(headerMaps));
+            if (buildHeadersListener != null) {
+                okHttpClientBuilder.addInterceptor(new HeaderInterceptor() {
+                    @Override
+                    public Map<String, String> buildHeaders() {
+                        return buildHeadersListener.buildHeaders();
+                    }
+                });
+            }
+
         }
 
         /**
