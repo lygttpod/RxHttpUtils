@@ -19,7 +19,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.1.9'
+        compile 'com.github.lygttpod:RxHttpUtils:2.2.0'
         }
 ```
 
@@ -39,11 +39,23 @@ public class MyApplication extends Application {
               OkHttpClient okHttpClient = new OkHttpConfig
                 .Builder(this)
                 //全局的请求头信息
-                .setHeaders(headerMaps)
+                .setHeaders(new BuildHeadersListener() {
+                    @Override
+                    public Map<String, String> buildHeaders() {
+                        HashMap<String, String> hashMap = new HashMap<>();
+                        hashMap.put("appVersion", BuildConfig.VERSION_NAME);
+                        hashMap.put("client", "android");
+                        hashMap.put("token", "your_token");
+                        hashMap.put("other_header", URLEncoder.encode("中文需要转码"));
+                        return hashMap;
+                    }
+                })
                 //开启缓存策略(默认false)
                 //1、在有网络的时候，先去读缓存，缓存时间到了，再去访问网络获取数据；
                 //2、在没有网络的时候，去读缓存中的数据。
                 .setCache(true)
+                .setHasNetCacheTime(10)//默认有网络时候缓存60秒
+                .setNoNetCacheTime(3600)//默认有网络时候缓存3600秒
                 //全局持久话cookie,保存到内存（new MemoryCookieStore()）或者保存到本地（new SPCookieStore(this)）
                 //不设置的话，默认不对cookie做处理
                 .setCookieType(new SPCookieStore(this))
@@ -248,7 +260,15 @@ b、
                 RxHttpUtils
                         .getSInstance()
                         .baseUrl("https://api.douban.com/")
-                        .addHeaders(headerMaps)
+                        .addHeaders(new BuildHeadersListener() {
+                            @Override
+                            public Map<String, String> buildHeaders() {
+                                Map<String, String> headerMaps = new TreeMap<>();
+                                headerMaps.put("header1", "header1");
+                                headerMaps.put("header2", "header2");
+                                return headerMaps;
+                            }
+                        })
                         .cache(true)
                         .cachePath("cachePath", 1024 * 1024 * 100)
                         .sslSocketFactory()
@@ -427,11 +447,23 @@ b、
           OkHttpClient okHttpClient = new OkHttpConfig
                 .Builder(this)
                 //全局的请求头信息
-                .setHeaders(headerMaps)
+                .setHeaders(new BuildHeadersListener() {
+                    @Override
+                    public Map<String, String> buildHeaders() {
+                        HashMap<String, String> hashMap = new HashMap<>();
+                        hashMap.put("appVersion", BuildConfig.VERSION_NAME);
+                        hashMap.put("client", "android");
+                        hashMap.put("token", "your_token");
+                        hashMap.put("other_header", URLEncoder.encode("中文需要转码"));
+                        return hashMap;
+                    }
+                })
                 //开启缓存策略(默认false)
                 //1、在有网络的时候，先去读缓存，缓存时间到了，再去访问网络获取数据；
                 //2、在没有网络的时候，去读缓存中的数据。
                 .setCache(true)
+                .setHasNetCacheTime(10)//默认有网络时候缓存60秒
+                .setNoNetCacheTime(3600)//默认有网络时候缓存3600秒
                 //全局持久话cookie,保存到内存（new MemoryCookieStore()）或者保存到本地（new SPCookieStore(this)）
                 //不设置的话，默认不对cookie做处理
                 .setCookieType(new SPCookieStore(this))
@@ -471,7 +503,15 @@ b、
                         //单个请求的baseUrl
                         .baseUrl("https://api.douban.com/")
                         //单个请求的header
-                        .addHeaders(headerMaps)
+                        .addHeaders(new BuildHeadersListener() {
+                            @Override
+                            public Map<String, String> buildHeaders() {
+                                Map<String, String> headerMaps = new TreeMap<>();
+                                headerMaps.put("header1", "header1");
+                                headerMaps.put("header2", "header2");
+                                return headerMaps;
+                            }
+                        })
                         //单个请求是否开启缓存
                         .cache(true)
                         //单个请求的缓存路径及缓存大小，不设置的话有默认值
@@ -529,6 +569,30 @@ b、
 
 
 # 更新日志
+
+### V2.2.0
+* 新增缓存时间的配置
+```
+                .setHasNetCacheTime(10)//单位秒
+                .setNoNetCacheTime(3600)//单位秒
+```
+* 全局请求头设置方式修改，可以实时获取header更新内容
+```
+        OkHttpClient okHttpClient = new OkHttpConfig
+                .Builder(this)
+                //添加公共请求头
+                .setHeaders(new BuildHeadersListener() {
+                    @Override
+                    public Map<String, String> buildHeaders() {
+                        HashMap<String, String> hashMap = new HashMap<>();
+                        hashMap.put("appVersion", BuildConfig.VERSION_NAME);
+                        hashMap.put("client", "android");
+                        hashMap.put("token", "your_token");
+                        hashMap.put("other_header", URLEncoder.encode("中文需要转码"));
+                        return hashMap;
+                    }
+                })
+```
 
 ### V2.1.9
 * 新增自定义下载路径的配置方法
