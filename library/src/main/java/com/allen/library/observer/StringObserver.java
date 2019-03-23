@@ -2,7 +2,7 @@ package com.allen.library.observer;
 
 import android.text.TextUtils;
 
-import com.allen.library.base.BaseStringObserver;
+import com.allen.library.base.BaseObserver;
 import com.allen.library.utils.ToastUtils;
 
 import io.reactivex.disposables.Disposable;
@@ -16,7 +16,7 @@ import io.reactivex.disposables.Disposable;
  * 自定义Observer 处理string回调
  */
 
-public abstract class StringObserver extends BaseStringObserver {
+public abstract class StringObserver extends BaseObserver<String> {
 
     /**
      * 失败回调

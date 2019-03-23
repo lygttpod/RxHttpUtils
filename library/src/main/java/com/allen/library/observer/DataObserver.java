@@ -2,7 +2,7 @@ package com.allen.library.observer;
 
 import android.text.TextUtils;
 
-import com.allen.library.base.BaseDataObserver;
+import com.allen.library.base.BaseObserver;
 import com.allen.library.bean.BaseData;
 import com.allen.library.utils.ToastUtils;
 
@@ -26,7 +26,7 @@ import io.reactivex.disposables.Disposable;
  * }
  */
 
-public abstract class DataObserver<T> extends BaseDataObserver<T> {
+public abstract class DataObserver<T> extends BaseObserver<BaseData<T>> {
 
     /**
      * 失败回调
