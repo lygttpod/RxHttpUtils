@@ -1,7 +1,7 @@
 [![](https://jitpack.io/v/lygttpod/RxHttpUtils.svg)](https://jitpack.io/#lygttpod/RxHttpUtils)
 
 # 重磅推出 RxHttpUtils 2.x 版本
-## RxJava+Retrofit封装，基于RxJava2和Retrofit2重构，便捷使用
+## RxJava+Retrofit封装，基于RxJava2和Retrofit2重构，便捷使用，支持动态切换baseUrl
 
 ### 添加Gradle依赖
 
@@ -19,7 +19,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.2.0'
+        compile 'com.github.lygttpod:RxHttpUtils:2.3.0'
         }
 ```
 
@@ -78,6 +78,13 @@ public class MyApplication extends Application {
                 .setDebug(true)
                 .build();
 
+        //一个项目多url的配置方法(这种写法的前提是事先已经知道所有的baseUrl了)
+        RxUrlManager.getInstance().setMultipleUrl(urlMap);
+        //如果是动态从服务器获取的baseUrl的话也可以添加进来
+        key是对url做区分使用，value就是服务器下发的baseUrl（baseUrl必须以"xxx/"斜杠结尾，retrofit的要求）
+        RxUrlManager.getInstance().addUrl("urlKey", "urlValue");
+
+        
         RxHttpUtils
                 .getInstance()
                 .init(this)
@@ -96,7 +103,7 @@ public class MyApplication extends Application {
 
 ### 2、默认已实现三种数据格式
 
-* 1、CommonObserver  （使用写自己的实体类即可，不用继承任何base）
+* 1、CommonObserver  （直接写自己的实体类即可，不用继承任何base）
 * 2、StringObserver   (直接String接收数据)
 * 3、DataObserver     (适合{"code":200,"msg":"描述",data:{}}这样的格式，需要使用BaseData&lt;T&gt; ,其中T为data中的数据模型)
 
@@ -227,96 +234,74 @@ b、
                          });
  ```
 
-# 3、~~单个请求配置(即将废除)~~
+# 3、多baseUrl使用说明
 
-> ## 温馨提示：针对某些请求有特殊要求的才建议使用此类方法，没特殊要求不建议使用
-
-### 3.1、单个请求使用默认配置
+### 3.1、使用不同的baseUrl发送请求
 ```
-                //单个请求使用默认配置的参数
-                RxHttpUtils
-                        .getSInstance()
-                        .baseUrl("https://api.douban.com/")
-                        .createSApi(ApiService.class)
-                        .getTop250(10)
-                        .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>() {
-
-                            @Override
-                            protected void onError(String errorMsg) {
-                                //错误处理
-                            }
-
-                            @Override
-                            protected void onSuccess(Top250Bean top250Bean) {
-                               //业务处理
-                            }
-                        });
+                创建格式如下
+                RxHttpUtils.createApi("xxxUrlKey", "xxxUrlValue", xxxApi.class)
+                
+                以下是demo中示例的三个不同baseUrl的使用方法
+                RxHttpUtils.createApi(AppUrlConfig.DOUBAN_KEY, AppUrlConfig.DOUBAN_URL, DouBanApi.class)
+                RxHttpUtils.createApi(AppUrlConfig.WANANDROID_KET, AppUrlConfig.WANANDROID_URL, WanAndroidApi.class)
+                RxHttpUtils.createApi(AppUrlConfig.OTHER_OPEN_KEY, AppUrlConfig.OTHER_OPEN_URL, OtherOpenApi.class)
 
 ```
-### 3.2、单个请求配置参数示例(可以根据需求选择性的配置)
+### 3.2、不同的baseUrl可以定制retrofit相关参数
 ```
-                //单个请求自己配置相关参数
-                RxHttpUtils
-                        .getSInstance()
-                        .baseUrl("https://api.douban.com/")
-                        .addHeaders(new BuildHeadersListener() {
-                            @Override
-                            public Map<String, String> buildHeaders() {
-                                Map<String, String> headerMaps = new TreeMap<>();
-                                headerMaps.put("header1", "header1");
-                                headerMaps.put("header2", "header2");
-                                return headerMaps;
-                            }
-                        })
-                        .cache(true)
-                        .cachePath("cachePath", 1024 * 1024 * 100)
-                        .sslSocketFactory()
-                        .cookieType(new MemoryCookieStore())
-                        .writeTimeout(10)
-                        .readTimeout(10)
-                        .connectTimeout(10)
-                        .log(true)
-                        .createSApi(ApiService.class)
-                        .getTop250(10)
-                        .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>() {
-
-                            @Override
-                            protected void onError(String errorMsg) {
-                                //错误处理
-                            }
-
-                            @Override
-                            protected void onSuccess(Top250Bean top250Bean) {
-                               //业务处理
-                            }
-                        });
+                ApiFactory.getInstance().setConverterFactory(...).setCallAdapterFactory(...).setOkClient(...).createApi(...)
 ```
-### 3.3、单个请求返回string
+### 3.3、注意事项：RxHttpUtils是对ApiFactory的封装，两种写法都可以
+```        
+                1、全局配置并且唯一baseUrl的两种写法如下
+                ①、RxHttpUtils.createApi(XXXApi.class)
+                ②、ApiFactory.getInstance().createApi(XXXApi.class)
+                
+                2、多个baseUrl两种写法如下
+                ①、RxHttpUtils.createApi("xxxUrlKey", "xxxUrlValue", XXXApi.class)
+                ②、ApiFactory.getInstance().createApi("xxxUrlKey", "xxxUrlValue", XXXApi.class)
+                
 ```
-                RxHttpUtils.getSInstance()
-                        .baseUrl("https://api.douban.com/")
-                        //注意这两个配置的顺序
-                        .addConverterFactory(ScalarsConverterFactory.create())
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .createSApi(ApiService.class)
-                        .getBookString()
-                        .compose(Transformer.<String>switchSchedulers(loading_dialog))
-                        .subscribe(new StringObserver() {
-                            @Override
-                            protected void onError(String errorMsg) {
+### 3.4、温馨提示
 
-                            }
+> ####一般情况下某一个baseUrl下会有很多不同的请求，每次都写一遍3.3中提到的写法的话代码重复太多，建议对不同的baseUrl进行提取，具体可参照demo中ApiHelper的写法
 
-                            @Override
-                            protected void onSuccess(String data) {
-                                showToast(data);
-                                responseTv.setText(data);
-                            }
-                        });
 ```
-
+                public class ApiHelper {
+                
+                    /**
+                     * 豆瓣url相关接口
+                     * 注意：DouBanApi里边是baseUrl为豆瓣的所有请求,这样写就可以为不同的baseUrl创建不同的retrofit对象
+                     * 可以为不同baseUrl设置不同的配置属性
+                     *
+                     * @return
+                     */
+                    public static DouBanApi getDouBanApi() {
+                        return RxHttpUtils.createApi(AppUrlConfig.DOUBAN_KEY, AppUrlConfig.DOUBAN_URL, DouBanApi.class);
+                    }
+                
+                    /**
+                     * 玩安卓url相关接口
+                     * 注意：WanAndroidApi里边是baseUrl为玩安卓的所有请求,这样写就可以为不同的baseUrl创建不同的retrofit对象
+                     *
+                     * @return
+                     */
+                    public static WanAndroidApi getWanAndroidApi() {
+                        return RxHttpUtils.createApi(AppUrlConfig.WANANDROID_KET, AppUrlConfig.WANANDROID_URL, WanAndroidApi.class);
+                    }
+                
+                
+                    /**
+                     * 其他开放的api接口
+                     * 注意：OtherOpenApi里边是baseUrl为其他开放接口的所有请求,这样写就可以为不同的baseUrl创建不同的retrofit对象
+                     *
+                     * @return
+                     */
+                    public static OtherOpenApi getOtherOpenApi() {
+                        return RxHttpUtils.createApi(AppUrlConfig.OTHER_OPEN_KEY, AppUrlConfig.OTHER_OPEN_URL, OtherOpenApi.class);
+                    }
+                }
+```
 ### 4、文件下载 ----使用简单粗暴
 ```
                 String url = "https://t.alipayobjects.com/L1/71/100/and/alipay_wap_main.apk";
@@ -569,6 +554,18 @@ b、
 
 
 # 更新日志
+
+### V2.3.0
+* 底层代码重构
+* 支持动态切换baseUrl
+```
+                1、全局配置并且唯一baseUrl的写法如下
+                RxHttpUtils.createApi(XXXApi.class) 等同于 ApiFactory.getInstance().createApi(XXXApi.class)
+                2、多个baseUrl写法如下
+                RxHttpUtils.createApi("xxxUrlKey", "xxxUrlValue", XXXApi.class) 等同于 ApiFactory.getInstance().createApi("xxxUrlKey", "xxxUrlValue", XXXApi.class)
+                3、多baseUrl的情况下可以设置不同retrofit配置,写法如下
+                ApiFactory.getInstance().setConverterFactory(...).setCallAdapterFactory(...).setOkClient(...).createApi(...)
+```
 
 ### V2.2.0
 * 新增缓存时间的配置
