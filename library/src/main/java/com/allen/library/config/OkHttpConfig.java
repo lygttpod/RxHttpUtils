@@ -5,7 +5,6 @@ import android.text.TextUtils;
 
 import com.allen.library.cookie.CookieJarImpl;
 import com.allen.library.cookie.store.CookieStore;
-import com.allen.library.http.HttpClient;
 import com.allen.library.http.SSLUtils;
 import com.allen.library.interceptor.HeaderInterceptor;
 import com.allen.library.interceptor.NetCacheInterceptor;
@@ -53,7 +52,7 @@ public class OkHttpConfig {
     public static OkHttpConfig getInstance() {
 
         if (instance == null) {
-            synchronized (HttpClient.class) {
+            synchronized (OkHttpConfig.class) {
                 if (instance == null) {
                     instance = new OkHttpConfig();
                 }

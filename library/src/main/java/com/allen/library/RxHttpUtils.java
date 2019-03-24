@@ -7,11 +7,10 @@ import android.content.Context;
 import com.allen.library.config.OkHttpConfig;
 import com.allen.library.cookie.CookieJarImpl;
 import com.allen.library.cookie.store.CookieStore;
-import com.allen.library.download.DownloadRetrofit;
-import com.allen.library.http.GlobalRxHttp;
-import com.allen.library.http.SingleRxHttp;
+import com.allen.library.download.DownloadHelper;
+import com.allen.library.factory.ApiFactory;
 import com.allen.library.manage.RxHttpManager;
-import com.allen.library.upload.UploadRetrofit;
+import com.allen.library.upload.UploadHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -76,9 +75,9 @@ public class RxHttpUtils {
     }
 
 
-    public GlobalRxHttp config() {
+    public ApiFactory config() {
         checkInitialize();
-        return GlobalRxHttp.getInstance();
+        return ApiFactory.getInstance();
     }
 
 
@@ -90,19 +89,20 @@ public class RxHttpUtils {
      * @return 返回
      */
     public static <K> K createApi(Class<K> cls) {
-        return GlobalRxHttp.createGApi(cls);
+        return ApiFactory.getInstance().createApi(cls);
     }
 
     /**
-     * 获取单个请求配置实例
-     * 后续版本即将移除---推荐使用全局配置的请求
+     * 切换baseUrl
      *
-     * @return SingleRxHttp
+     * @param baseUrlKey   域名的key
+     * @param baseUrlValue 域名的url
+     * @param cls          class
+     * @param <K>          k
+     * @return k
      */
-    @Deprecated
-    public static SingleRxHttp getSInstance() {
-
-        return SingleRxHttp.getInstance();
+    public static <K> K createApi(String baseUrlKey, String baseUrlValue, Class<K> cls) {
+        return ApiFactory.getInstance().createApi(baseUrlKey, baseUrlValue, cls);
     }
 
 
@@ -113,7 +113,7 @@ public class RxHttpUtils {
      * @return ResponseBody
      */
     public static Observable<ResponseBody> downloadFile(String fileUrl) {
-        return DownloadRetrofit.downloadFile(fileUrl);
+        return DownloadHelper.downloadFile(fileUrl);
     }
 
     /**
@@ -124,7 +124,7 @@ public class RxHttpUtils {
      * @return ResponseBody
      */
     public static Observable<ResponseBody> uploadImg(String uploadUrl, String filePath) {
-        return UploadRetrofit.uploadImage(uploadUrl, filePath);
+        return UploadHelper.uploadImage(uploadUrl, filePath);
     }
 
     /**
@@ -135,7 +135,7 @@ public class RxHttpUtils {
      * @return ResponseBody
      */
     public static Observable<ResponseBody> uploadImages(String uploadUrl, List<String> filePaths) {
-        return UploadRetrofit.uploadImages(uploadUrl, filePaths);
+        return UploadHelper.uploadImages(uploadUrl, filePaths);
     }
 
     /**
@@ -155,7 +155,7 @@ public class RxHttpUtils {
      * @return ResponseBody
      */
     public static Observable<ResponseBody> uploadImagesWithParams(String uploadUrl, String fileName, Map<String, Object> paramsMap, List<String> filePaths) {
-        return UploadRetrofit.uploadFilesWithParams(uploadUrl, fileName, paramsMap, filePaths);
+        return UploadHelper.uploadFilesWithParams(uploadUrl, fileName, paramsMap, filePaths);
     }
 
     /**
