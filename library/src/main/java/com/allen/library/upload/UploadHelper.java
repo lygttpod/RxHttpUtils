@@ -1,7 +1,7 @@
 package com.allen.library.upload;
 
 
-import com.allen.library.http.RetrofitClient;
+import com.allen.library.factory.ApiFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,9 +13,6 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * <pre>
@@ -25,39 +22,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  *      version : 1.0
  * </pre>
  */
-public class UploadRetrofit {
-
-    private static UploadRetrofit instance;
-    private Retrofit mRetrofit;
-
-    private static String baseUrl = "https://api.github.com/";
-
-
-    public UploadRetrofit() {
-        mRetrofit = new Retrofit.Builder()
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(baseUrl)
-                .build();
-    }
-
-    public static UploadRetrofit getInstance() {
-
-        if (instance == null) {
-            synchronized (RetrofitClient.class) {
-                if (instance == null) {
-                    instance = new UploadRetrofit();
-                }
-            }
-
-        }
-        return instance;
-    }
-
-    public Retrofit getRetrofit() {
-        return mRetrofit;
-    }
-
+public class UploadHelper {
 
     /**
      * 上传一张图片
@@ -88,7 +53,7 @@ public class UploadRetrofit {
      *
      * @param uploadUrl 上传图片的服务器url
      * @param fileName  后台协定的接受图片的name（没特殊要求就可以随便写）
-     * @param paramsMap       普通参数
+     * @param paramsMap 普通参数
      * @param filePaths 图片路径
      * @return Observable
      */
@@ -112,10 +77,11 @@ public class UploadRetrofit {
 
         List<MultipartBody.Part> parts = builder.build().parts();
 
-        return UploadRetrofit
-                .getInstance()
-                .getRetrofit()
-                .create(UploadFileApi.class)
+        String DEFAULT_UPLOAD_KEY = "defaultUploadUrlKey";
+        String DEFAULT_BASE_URL = "https://api.github.com/";
+
+        return ApiFactory.getInstance()
+                .createApi(DEFAULT_UPLOAD_KEY, DEFAULT_BASE_URL, UploadFileApi.class)
                 .uploadFiles(uploadUrl, parts);
     }
 }

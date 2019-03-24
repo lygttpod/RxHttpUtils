@@ -2,6 +2,7 @@ package com.allen.library.download;
 
 import android.annotation.SuppressLint;
 
+import com.allen.library.base.BaseObserver;
 import com.allen.library.manage.RxHttpManager;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ import okhttp3.ResponseBody;
  * 文件下载
  */
 
-public abstract class DownloadObserver extends BaseDownloadObserver {
+public abstract class DownloadObserver extends BaseObserver<ResponseBody> {
 
     private String fileName;
     private String destFileDir;
@@ -45,17 +46,6 @@ public abstract class DownloadObserver extends BaseDownloadObserver {
      */
     protected abstract void onError(String errorMsg);
 
-    /**
-     * 标记网络请求的tag
-     * tag下的一组或一个请求，用来处理一个页面的所以请求或者某个请求
-     * 设置一个tag就行就可以取消当前页面所有请求或者某个请求了
-     *
-     * @return string
-     */
-    protected String setTag() {
-        return null;
-    }
-
 
     /**
      * 成功回调
@@ -75,18 +65,18 @@ public abstract class DownloadObserver extends BaseDownloadObserver {
 
 
     @Override
-    protected void doOnError(String errorMsg) {
+    public void doOnError(String errorMsg) {
         onError(errorMsg);
     }
 
     @Override
-    public void onSubscribe(@NonNull Disposable d) {
+    public void doOnSubscribe(Disposable d) {
         RxHttpManager.get().add(setTag(), d);
     }
 
     @SuppressLint("CheckResult")
     @Override
-    public void onNext(@NonNull ResponseBody responseBody) {
+    public void doOnNext(ResponseBody responseBody) {
         Observable
                 .just(responseBody)
                 .subscribeOn(Schedulers.io())
@@ -143,7 +133,7 @@ public abstract class DownloadObserver extends BaseDownloadObserver {
     }
 
     @Override
-    public void onComplete() {
+    public void doOnCompleted() {
 
     }
 }
