@@ -66,25 +66,25 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:gravity="center"
-            android:text="备注：没有特殊请求的话就直接使用全局请求即可" />
+            android:text="以下为多个baseUrl的使用方法" />
 
         <Button
-            android:id="@+id/single_http_default"
+            android:id="@+id/douan_api_http"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="单个请求---使用默认配置" />
+            android:text="使用豆瓣baseUrl请求数据" />
 
         <Button
-            android:id="@+id/single_http"
+            android:id="@+id/other_open_api_http"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="单个请求---自己配置请求基础参数" />
+            android:text="使用其他三方开放baseUrl请求数据" />
 
         <Button
-            android:id="@+id/single_string_http"
+            android:id="@+id/wanandroid_api_http"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="单个请求---返回字符串" />
+            android:text="使用玩安卓baseUrl请求数据" />
 
         <TextView
             android:id="@+id/response_tv"

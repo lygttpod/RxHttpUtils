@@ -7,6 +7,8 @@ import com.allen.library.RxHttpUtils;
 import com.allen.library.config.OkHttpConfig;
 import com.allen.library.cookie.store.SPCookieStore;
 import com.allen.library.interfaces.BuildHeadersListener;
+import com.allen.library.manage.RxUrlManager;
+import com.allen.rxhttputils.url.AppUrlConfig;
 
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -27,32 +29,49 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-//        initRxHttpUtils();
-        initCustomRxHttpUtils();
-
+        initRxHttpUtils();
     }
-
-
-    /**
-     * 快速上手，默认配置
-     */
-    private void initRxHttpUtils() {
-        RxHttpUtils
-                .getInstance()
-                .init(this)
-                .config()
-                //配置全局baseUrl
-                .setBaseUrl("https://api.douban.com/");
-    }
-
 
     /**
      * 全局请求的统一配置（以下配置根据自身情况选择性的配置即可）
      */
-    private void initCustomRxHttpUtils() {
+    private void initRxHttpUtils() {
 
-//        获取证书
+        //一个项目多url的配置方法
+        RxUrlManager.getInstance().setMultipleUrl(AppUrlConfig.getAllUrl());
+
+        RxHttpUtils
+                .getInstance()
+                .init(this)
+                .config()
+                //自定义factory的用法
+                //.setCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                //.setConverterFactory(ScalarsConverterFactory.create(),GsonConverterFactory.create(GsonAdapter.buildGson()))
+                //配置全局baseUrl
+                .setBaseUrl("https://www.wanandroid.com/")
+                //开启全局配置
+                .setOkClient(createOkHttp());
+
+//        TODO: 2018/5/31 如果以上OkHttpClient的配置满足不了你，传入自己的 OkHttpClient 自行设置
+//        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+//
+//        builder
+//                .addInterceptor(log_interceptor)
+//                .readTimeout(10, TimeUnit.SECONDS)
+//                .writeTimeout(10, TimeUnit.SECONDS)
+//                .connectTimeout(10, TimeUnit.SECONDS);
+//
+//        RxHttpUtils
+//                .getInstance()
+//                .init(this)
+//                .config()
+//                .setBaseUrl(BuildConfig.BASE_URL)
+//                .setOkClient(builder.build());
+
+    }
+
+    private OkHttpClient createOkHttp() {
+        //        获取证书
 //        InputStream cerInputStream = null;
 //        InputStream bksInputStream = null;
 //        try {
@@ -102,36 +121,10 @@ public class App extends Application {
                 //全局超时配置
                 .setConnectTimeout(10)
                 //全局是否打开请求log日志
-                .setDebug(true)
+                .setDebug(BuildConfig.DEBUG)
                 .build();
 
-        RxHttpUtils
-                .getInstance()
-                .init(this)
-                .config()
-                //自定义factory的用法
-                //.setCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                //.setConverterFactory(ScalarsConverterFactory.create(),GsonConverterFactory.create(GsonAdapter.buildGson()))
-                //配置全局baseUrl
-                .setBaseUrl("https://api.douban.com/")
-                //开启全局配置
-                .setOkClient(okHttpClient);
-
-//        TODO: 2018/5/31 如果以上OkHttpClient的配置满足不了你，传入自己的 OkHttpClient 自行设置
-//        OkHttpClient.Builder builder = new OkHttpClient.Builder();
-//
-//        builder
-//                .addInterceptor(log_interceptor)
-//                .readTimeout(10, TimeUnit.SECONDS)
-//                .writeTimeout(10, TimeUnit.SECONDS)
-//                .connectTimeout(10, TimeUnit.SECONDS);
-//
-//        RxHttpUtils
-//                .getInstance()
-//                .init(this)
-//                .config()
-//                .setBaseUrl(BuildConfig.BASE_URL)
-//                .setOkClient(builder.build());
+        return okHttpClient;
     }
 
 

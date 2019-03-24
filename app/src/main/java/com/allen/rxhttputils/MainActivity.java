@@ -15,16 +15,20 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.allen.library.RxHttpUtils;
-import com.allen.library.cookie.store.MemoryCookieStore;
+import com.allen.library.bean.BaseData;
 import com.allen.library.download.DownloadObserver;
+import com.allen.library.factory.ApiFactory;
 import com.allen.library.interceptor.Transformer;
-import com.allen.library.interfaces.BuildHeadersListener;
 import com.allen.library.interfaces.ILoadingView;
 import com.allen.library.observer.CommonObserver;
+import com.allen.library.observer.DataObserver;
 import com.allen.library.observer.StringObserver;
-import com.allen.rxhttputils.api.ApiService;
-import com.allen.rxhttputils.bean.BookBean;
+import com.allen.rxhttputils.api.ApiHelper;
+import com.allen.rxhttputils.api.DouBanApi;
+import com.allen.rxhttputils.api.WanAndroidApi;
+import com.allen.rxhttputils.bean.BannerBean;
 import com.allen.rxhttputils.bean.Top250Bean;
+import com.allen.rxhttputils.url.AppUrlConfig;
 import com.allen.rxhttputils.widget.LoadingDialog;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zhihu.matisse.Matisse;
@@ -38,7 +42,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import io.reactivex.ObservableSource;
 import io.reactivex.annotations.NonNull;
@@ -48,8 +51,6 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import static com.allen.library.utils.ToastUtils.showToast;
 
@@ -71,9 +72,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loading_dialog = new LoadingDialog(this);
         setContentView(R.layout.activity_main);
         responseTv = (TextView) findViewById(R.id.response_tv);
-        findViewById(R.id.single_http_default).setOnClickListener(this);
-        findViewById(R.id.single_http).setOnClickListener(this);
-        findViewById(R.id.single_string_http).setOnClickListener(this);
+        findViewById(R.id.douan_api_http).setOnClickListener(this);
+        findViewById(R.id.other_open_api_http).setOnClickListener(this);
+        findViewById(R.id.wanandroid_api_http).setOnClickListener(this);
         findViewById(R.id.global_http).setOnClickListener(this);
         findViewById(R.id.multiple_http).setOnClickListener(this);
         download_http = (Button) findViewById(R.id.download_http);
@@ -94,15 +95,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         responseTv.setText("");
 
+        /**
+         * 注意事项：两种写法都可以
+         * 1、全局配置并且唯一baseUrl的写法如下
+         * RxHttpUtils.createApi(XXXApi.class) 等同于 ApiFactory.getInstance().createApi(XXXApi.class)
+         * 2、多个baseUrl写法如下
+         * RxHttpUtils.createApi("xxxUrlKey", "xxxUrlValue", XXXApi.class) 等同于 ApiFactory.getInstance().createApi("xxxUrlKey", "xxxUrlValue", XXXApi.class)
+         * 3、多baseUrl的情况下可以设置不同retrofit配置,写法如下
+         * ApiFactory.getInstance(...).setConverterFactory(...).setCallAdapterFactory(...).setOkClient(...).createApi(...)
+         */
         switch (v.getId()) {
-
             case R.id.global_http:
                 RxHttpUtils
-                        .createApi(ApiService.class)
-                        .getBook()
-                        .compose(Transformer.<BookBean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<BookBean>() {
-
+                        .createApi(WanAndroidApi.class)
+                        .getBanner()
+                        .compose(Transformer.<BaseData<List<BannerBean>>>switchSchedulers(loading_dialog))
+                        .subscribe(new DataObserver<List<BannerBean>>() {
                             //默认false   隐藏onError的提示
                             @Override
                             protected boolean isHideToast() {
@@ -122,8 +130,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
 
                             @Override
-                            protected void onSuccess(BookBean bookBean) {
-                                String s = bookBean.getSummary();
+                            protected void onSuccess(List<BannerBean> data) {
+                                String s = data.get(0).toString();
                                 responseTv.setText(s);
                                 showToast(s);
                             }
@@ -132,8 +140,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.global_string_http:
                 RxHttpUtils
-                        .createApi(ApiService.class)
-                        .getBookString()
+                        .createApi(WanAndroidApi.class)
+                        .getHotSearchStringData()
                         .compose(Transformer.<String>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<String>() {
 
@@ -158,39 +166,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.multiple_http:
 
                 RxHttpUtils
-                        .createApi(ApiService.class)
-                        .getBook()
-                        .flatMap(new Function<BookBean, ObservableSource<Top250Bean>>() {
+                        .createApi(WanAndroidApi.class)
+                        .getBanner()
+                        .flatMap(new Function<BaseData<List<BannerBean>>, ObservableSource<String>>() {
                             @Override
-                            public ObservableSource<Top250Bean> apply(@NonNull BookBean bookBean) throws Exception {
+                            public ObservableSource<String> apply(@NonNull BaseData<List<BannerBean>> baseData) throws Exception {
                                 return RxHttpUtils
-                                        .createApi(ApiService.class)
-                                        .getTop250(20);
+                                        .createApi(WanAndroidApi.class)
+                                        .getHotSearchStringData();
                             }
                         })
-                        .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>() {
-                            @Override
-                            protected String setTag() {
-                                return "tag2";
-                            }
-
+                        .compose(Transformer.<String>switchSchedulers(loading_dialog))
+                        .subscribe(new StringObserver() {
                             @Override
                             protected void onError(String errorMsg) {
 
                             }
 
                             @Override
-                            protected void onSuccess(Top250Bean top250Bean) {
-                                StringBuilder sb = new StringBuilder();
-                                sb.append(top250Bean.getTitle() + "\n");
-
-                                for (Top250Bean.SubjectsBean s : top250Bean.getSubjects()) {
-                                    sb.append(s.getTitle() + "\n");
-                                }
-                                responseTv.setText(sb.toString());
-                                //请求成功
-                                showToast(sb.toString());
+                            protected void onSuccess(String data) {
+                                responseTv.setText(data);
+                                showToast(data);
                             }
                         });
 
@@ -224,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     download_http.setEnabled(true);
                                     download_http.setText("文件下载");
                                     responseTv.setText("下载文件路径：" + filePath);
-
+                                    showToast("下载完成：" + filePath);
                                 }
 
                             }
@@ -249,20 +245,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 IS_USE_GLOBAL_CONFIG = true;
                 selectPhotoWithPermission(MAX_SELECTABLE);
                 break;
-            case R.id.single_http_default:
-                RxHttpUtils
-                        .getSInstance()
-                        .baseUrl("https://api.douban.com/")
-                        .createSApi(ApiService.class)
+            case R.id.douan_api_http:
+                ApiHelper.getDouBanApi()
                         .getTop250(5)
                         .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
                         .subscribe(new CommonObserver<Top250Bean>() {
                             @Override
-                            protected String setTag() {
-                                return "tag4";
-                            }
-
-                            @Override
                             protected void onError(String errorMsg) {
 
                             }
@@ -270,6 +258,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             @Override
                             protected void onSuccess(Top250Bean top250Bean) {
                                 StringBuilder sb = new StringBuilder();
+                                sb.append(top250Bean.getTitle() + "\n");
+
                                 for (Top250Bean.SubjectsBean s : top250Bean.getSubjects()) {
                                     sb.append(s.getTitle() + "\n");
                                 }
@@ -279,90 +269,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         });
                 break;
-
-            case R.id.single_http:
-
-                RxHttpUtils
-                        //单个请求的实例getSInstance(getSingleInstance的缩写)
-                        .getSInstance()
-                        //单个请求的baseUrl
-                        .baseUrl("https://api.douban.com/")
-                        //单个请求的header
-                        .addHeaders(new BuildHeadersListener() {
-                            @Override
-                            public Map<String, String> buildHeaders() {
-                                Map<String, String> headerMaps = new TreeMap<>();
-                                headerMaps.put("header1", "header1");
-                                headerMaps.put("header2", "header2");
-                                return headerMaps;
-                            }
-                        })
-                        //单个请求是否开启缓存
-                        .cache(true)
-                        //单个请求的缓存路径及缓存大小，不设置的话有默认值
-                        .cachePath("cachePath", 1024 * 1024 * 100)
-                        //单个请求的ssl证书认证,支持三种认证方式
-                        //信任所有证书,不安全有风险
-                        .sslSocketFactory()
-                        //使用预埋证书，校验服务端证书（自签名证书）
-                        //.setSslSocketFactory(getAssets().open("your.cer"))
-                        //使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
-                        //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
-                        //单个请求是否持久化cookie
-                        .cookieType(new MemoryCookieStore())
-                        //单个请求超时
-                        .writeTimeout(10)
-                        .readTimeout(10)
-                        .connectTimeout(10)
-                        //单个请求是否开启log日志
-                        .log(true)
-                        //区分全局变量的请求createSApi(createSingleApi的缩写)
-                        .createSApi(ApiService.class)
-                        //自己ApiService中的方法名
-                        .getTop250(10)
-                        //内部配置了线程切换相关策略
-                        //如果需要请求loading需要传入自己的loading_dialog
-                        //使用loading的话需要在CommonObserver<XXX>(loading_dialog)中也传去
-                        .compose(Transformer.<Top250Bean>switchSchedulers(loading_dialog))
-                        .subscribe(new CommonObserver<Top250Bean>() {
-                            //默认false
-//                            @Override
-//                            public boolean isHideToast() {
-//                                return true;
-//                            }
-
-                            @Override
-                            protected void onError(String errorMsg) {
-                                //错误处理
-                            }
-
-                            @Override
-                            protected void onSuccess(Top250Bean top250Bean) {
-                                StringBuilder sb = new StringBuilder();
-                                for (Top250Bean.SubjectsBean s : top250Bean.getSubjects()) {
-                                    sb.append(s.getTitle() + "\n");
-                                }
-                                responseTv.setText(sb.toString());
-                                //请求成功
-                                showToast(sb.toString());
-                            }
-                        });
-                break;
-            case R.id.single_string_http:
-                RxHttpUtils.getSInstance()
-                        .baseUrl("https://api.douban.com/")
-                        .addConverterFactory(ScalarsConverterFactory.create())
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .createSApi(ApiService.class)
-                        .getBookString()
+            case R.id.other_open_api_http:
+                ApiHelper.getOtherOpenApi()
+                        .getJokesRandom()
                         .compose(Transformer.<String>switchSchedulers(loading_dialog))
                         .subscribe(new StringObserver() {
-                            //默认false   是否隐藏onError的提示
-                            @Override
-                            protected boolean isHideToast() {
-                                return false;
-                            }
-
                             @Override
                             protected void onError(String errorMsg) {
 
@@ -370,11 +281,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                             @Override
                             protected void onSuccess(String data) {
-                                showToast(data);
                                 responseTv.setText(data);
+                                showToast(data);
                             }
                         });
+                break;
+            case R.id.wanandroid_api_http:
+                ApiHelper.getWanAndroidApi()
+                        .getBanner()
+                        .compose(Transformer.<BaseData<List<BannerBean>>>switchSchedulers(loading_dialog))
+                        .subscribe(new DataObserver<List<BannerBean>>() {
+                            @Override
+                            protected void onError(String errorMsg) {
 
+                            }
+
+                            @Override
+                            protected void onSuccess(List<BannerBean> data) {
+                                responseTv.setText(data.get(0).getTitle());
+                                showToast(data.get(0).getTitle());
+                            }
+                        });
                 break;
 
             default:
@@ -406,7 +333,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void uploadImgWithGlobalConfig(List<String> filePaths) {
 
         //以下使用的是全局配置
-        RxHttpUtils.createApi(ApiService.class)
+        RxHttpUtils.createApi(DouBanApi.class)
                 .uploadFiles(UPLOAD_URL, getMultipartPart("uploaded_file", null, filePaths))
                 .compose(Transformer.<String>switchSchedulers(loading_dialog))
                 .subscribe(new StringObserver() {
