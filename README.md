@@ -1,4 +1,4 @@
-[![](https://jitpack.io/v/lygttpod/RxHttpUtils.svg)](https://jitpack.io/#lygttpod/RxHttpUtils)
+1[![](https://jitpack.io/v/lygttpod/RxHttpUtils.svg)](https://jitpack.io/#lygttpod/RxHttpUtils)
 
 # 重磅推出 RxHttpUtils 2.x 版本
 ## RxJava+Retrofit封装，基于RxJava2和Retrofit2重构，便捷使用，支持动态切换baseUrl
@@ -19,7 +19,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.3.0'
+        compile 'com.github.lygttpod:RxHttpUtils:2.3.1'
         }
 ```
 
@@ -264,7 +264,7 @@ b、
 ```
 ### 3.4、温馨提示
 
-> ####一般情况下某一个baseUrl下会有很多不同的请求，每次都写一遍3.3中提到的写法的话代码重复太多，建议对不同的baseUrl进行提取，具体可参照demo中ApiHelper的写法
+> #### 一般情况下某一个baseUrl下会有很多不同的请求，每次都写一遍3.3中提到的写法的话代码重复太多，建议对不同的baseUrl进行提取，具体可参照demo中ApiHelper的写法
 
 ```
                 public class ApiHelper {
@@ -481,44 +481,7 @@ b、
                 .setOkClient(okHttpClient);
 
 ```
-> 单个请求参数：
-```
-                        //单个请求的实例getSInstance(getSingleInstance的缩写)
-                        .getSInstance()
-                        //单个请求的baseUrl
-                        .baseUrl("https://api.douban.com/")
-                        //单个请求的header
-                        .addHeaders(new BuildHeadersListener() {
-                            @Override
-                            public Map<String, String> buildHeaders() {
-                                Map<String, String> headerMaps = new TreeMap<>();
-                                headerMaps.put("header1", "header1");
-                                headerMaps.put("header2", "header2");
-                                return headerMaps;
-                            }
-                        })
-                        //单个请求是否开启缓存
-                        .cache(true)
-                        //单个请求的缓存路径及缓存大小，不设置的话有默认值
-                        .cachePath("cachePath", 1024 * 1024 * 100)
-                        //单个请求的ssl证书认证，支持三种方式
-                        //1、信任所有证书,不安全有风险
-                        .setSslSocketFactory()
-                        //2、使用预埋证书，校验服务端证书（自签名证书）
-                        //.setSslSocketFactory(getAssets().open("your.cer"))
-                        //3、使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
-                        //.setSslSocketFactory(getAssets().open("your.bks"), "123456", getAssets().open("your.cer"))
-                        //单个请求是否持久化cookie
-                        .saveCookie(true)
-                        //单个请求超时
-                        .writeTimeout(10)
-                        .readTimeout(10)
-                        .connectTimeout(10)
-                        //单个请求是否开启log日志
-                        .log(true)
-                        //区分全局变量的请求createSApi(createSingleApi的缩写)
-                        .createSApi(ApiService.class)
-```
+
 ```
                 new XXXObserver<XXX>() {
 
@@ -553,161 +516,7 @@ b、
 
 
 
-# 更新日志
-
-### V2.3.0
-* 底层代码重构
-* 支持动态切换baseUrl
-```
-                1、全局配置并且唯一baseUrl的写法如下
-                RxHttpUtils.createApi(XXXApi.class) 等同于 ApiFactory.getInstance().createApi(XXXApi.class)
-                2、多个baseUrl写法如下
-                RxHttpUtils.createApi("xxxUrlKey", "xxxUrlValue", XXXApi.class) 等同于 ApiFactory.getInstance().createApi("xxxUrlKey", "xxxUrlValue", XXXApi.class)
-                3、多baseUrl的情况下可以设置不同retrofit配置,写法如下
-                ApiFactory.getInstance().setConverterFactory(...).setCallAdapterFactory(...).setOkClient(...).createApi(...)
-```
-
-### V2.2.0
-* 新增缓存时间的配置
-```
-                .setHasNetCacheTime(10)//单位秒
-                .setNoNetCacheTime(3600)//单位秒
-```
-* 全局请求头设置方式修改，可以实时获取header更新内容
-```
-        OkHttpClient okHttpClient = new OkHttpConfig
-                .Builder(this)
-                //添加公共请求头
-                .setHeaders(new BuildHeadersListener() {
-                    @Override
-                    public Map<String, String> buildHeaders() {
-                        HashMap<String, String> hashMap = new HashMap<>();
-                        hashMap.put("appVersion", BuildConfig.VERSION_NAME);
-                        hashMap.put("client", "android");
-                        hashMap.put("token", "your_token");
-                        hashMap.put("other_header", URLEncoder.encode("中文需要转码"));
-                        return hashMap;
-                    }
-                })
-```
-
-### V2.1.9
-* 新增自定义下载路径的配置方法
-```
-                RxHttpUtils
-                        .downloadFile(url)
-                        //.subscribe(new DownloadObserver(fileName,destFileDir) 其中 destFileDir是自定义下载存储路径
-                        .subscribe(new DownloadObserver(fileName) 
-```
-* 新增全局配置自定义Retrofit的Factory方法
-```
-        RxHttpUtils
-                .getInstance()
-                .init(this)
-                .config()
-                //自定义factory的用法(在setBaseUrl之前配置)
-                //.setCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                //.setConverterFactory(ScalarsConverterFactory.create(),GsonConverterFactory.create(GsonAdapter.buildGson()))
-                //配置全局baseUrl
-                .setBaseUrl("https://api.douban.com/")
-                //开启全局配置
-                .setOkClient(okHttpClient);
-```
-
-### V2.1.8
-* 修复调用RxHttpUtils.canceAll()报ConcurrentModificationException异常的bug
-
-### V2.1.7
-* 修复getExternalCacheDir获取空指针异常的问题
-* 新增使用全局配置上传图片的demo示例
-
-### V2.1.6
-* 修复日志打印使用StringBuilder导致多线程使用线程不安全的问题（表现在多个请求同时进行的时候出现异常的bug），使用StringBuffer代替StringBuilder
-
-### V2.1.5
-* 修复errorBody中为空时候异常信息无法获取的bug
-
-### V2.1.4
-* 修复无网络且无缓存时候的依然读取缓存导致504错误的问题;
-* 新增对Retrofit进行缓存处理，避免重复创建Retrofit对象;
-* 在XXXObserver中去掉对loading的处理，统一放在Transformer中控制
-
-
-### V2.1.3
-* 重写取消请求的方法，通过设置tag可以管理一个请求或一组请求，默认tag为空
-```
-                new XXXObserver<BookBean>() {
-
-                    //重写setTag方法配置当前请求的tag
-                    //温馨提示：可以多个请求设置相同的tag自动归为一组，可以一次取消相同tag的所有请求
-                    //(适用于一个页面多个请求，配置相同tag，在页面销毁时一次性取消)
-                    @Override
-                    protected String setTag() {
-                        return "yourTag";
-                    }
-
-                    @Override
-                    protected void onError(String errorMsg) {
-
-                    }
-
-                    @Override
-                    protected void onSuccess(BookBean bookBean) {
-
-                    }
-                }
-
-```
-```
-                //调取如下方法取消某个或某组请求
-                RxHttpUtils.cancel("yourTag");
-
-                //调取如下方法取消多个或多组请求
-                RxHttpUtils.cancel("yourTag1","yourTag2","yourTag3");
-```
-
-### V2.1.2
-* cookie持久化方案去除拦截器方式，使用cookieJar管理
-```
-    支持两种方式做持久化cookie，默认不设置的话不对cookie做任何处理
-    new MemoryCookieStore()  持久化到内存
-    new SPCookieStore(this)  持久化到本地SP文件
-
-    使用方式如下
-    .setCookieType(new SPCookieStore(this))
-```
-> 感谢[**OkGo**](https://github.com/jeasonlzy/okhttp-OkGo) 提供的技术方案
-
-
-### V2.1.1
-* 修复header参数类型转换异常的bug
-
-### V2.1.0
-* 支持图文上传
-* 优化请求日志打印
-* 优化缓存
-* 全局okhttpclient单例
-
-### V2.0.5
-* 新增上传多张图片的接口
-* 新增onError中默认Toast的控制显示隐藏的配置
-* 在CommonObserver或DataObserver或StringObserver中重写isHideToast方法，默认false显示toast
-
-### V2.0.4
-* 新增上传图片功能
-* 针对字段为int，double，long类型，如果后台返回""或者null,则对应返回0，0.00，0L
-
-### V2.0.3
-* 优化底层代码，去除必须继承BaseRxHttpApplication和baseResponse的限制，使用更灵活
-
-### V2.0.1
-* 添加对https的支持
-
-### V2.0.0
-* 基于RxJava2和Retrofit2重构
-
-### V1.0.2
-* 	新增网络缓存
+# [更新日志](https://github.com/lygttpod/RxHttpUtils/releases)
 
 # 意见反馈
 
