@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.HostnameVerifier;
+
 import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -83,6 +85,7 @@ public class OkHttpConfig {
         private InputStream[] certificates;
         private Interceptor[] interceptors;
         private BuildHeadersListener buildHeadersListener;
+        private HostnameVerifier hostnameVerifier;
 
         public Builder(Context context) {
             this.context = context;
@@ -160,6 +163,11 @@ public class OkHttpConfig {
             return this;
         }
 
+        public Builder setHostnameVerifier(HostnameVerifier hostnameVerifier) {
+            this.hostnameVerifier = hostnameVerifier;
+            return this;
+        }
+
 
         public OkHttpClient build() {
 
@@ -169,6 +177,7 @@ public class OkHttpConfig {
             setCacheConfig();
             setHeadersConfig();
             setSslConfig();
+            setHostnameVerifier();
             addInterceptors();
             setTimeout();
             setDebugConfig();
@@ -275,7 +284,14 @@ public class OkHttpConfig {
             }
 
             okHttpClientBuilder.sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager);
+        }
 
+        private void setHostnameVerifier() {
+            if (null == hostnameVerifier) {
+                okHttpClientBuilder.hostnameVerifier(SSLUtils.UnSafeHostnameVerifier);
+            } else {
+                okHttpClientBuilder.hostnameVerifier(hostnameVerifier);
+            }
         }
     }
 }

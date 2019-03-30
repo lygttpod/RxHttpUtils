@@ -114,6 +114,8 @@ public class App extends Application {
                 //.setSslSocketFactory(cerInputStream)
                 //3、使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
                 //.setSslSocketFactory(bksInputStream,"123456",cerInputStream)
+                //设置Hostname校验规则，默认实现返回true，需要时候传入相应校验规则即可
+                //.setHostnameVerifier(null)
                 //全局超时配置
                 .setReadTimeout(10)
                 //全局超时配置
