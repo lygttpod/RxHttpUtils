@@ -21,7 +21,7 @@ public class DownloadHelper {
         String DEFAULT_DOWNLOAD_KEY = "defaultDownloadUrlKey";
         String DEFAULT_BASE_URL = "https://api.github.com/";
         return ApiFactory.getInstance()
-                .setOkClient(new OkHttpClient())
+                .setOkClient(new OkHttpClient.Builder().addInterceptor(new DownloadInterceptor()).build())
                 .createApi(DEFAULT_DOWNLOAD_KEY, DEFAULT_BASE_URL, DownloadApi.class)
                 .downloadFile(fileUrl)
                 .compose(Transformer.<ResponseBody>switchSchedulers());
