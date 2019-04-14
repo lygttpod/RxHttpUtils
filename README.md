@@ -19,7 +19,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.3.1'
+        compile 'com.github.lygttpod:RxHttpUtils:2.3.2'
         }
 ```
 
@@ -536,7 +536,7 @@ b、
 </div>
 
 # License
-         Copyright 2016 Allen
+         Copyright 2019 Allen
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
