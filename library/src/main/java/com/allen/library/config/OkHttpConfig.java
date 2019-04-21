@@ -64,8 +64,12 @@ public class OkHttpConfig {
         return instance;
     }
 
-    public static OkHttpClient getOkHttpClient() {
-        return okHttpClient;
+    public OkHttpClient getOkHttpClient() {
+        if (okHttpClient == null) {
+            return okHttpClientBuilder.build();
+        } else {
+            return okHttpClient;
+        }
     }
 
     public static class Builder {

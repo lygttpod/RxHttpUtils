@@ -23,7 +23,7 @@ public class ApiFactory {
     private volatile static ApiFactory instance;
 
     /**
-     * 缓存retrofit针对同一个同一个域名下相同的ApiService不会重复创建retrofit对象
+     * 缓存retrofit针对同一个域名下相同的ApiService不会重复创建retrofit对象
      */
     private static HashMap<String, Object> apiServiceCache;
 

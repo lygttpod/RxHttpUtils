@@ -162,7 +162,7 @@ public class RxHttpUtils {
      * 获取全局的CookieJarImpl实例
      */
     private static CookieJarImpl getCookieJar() {
-        return (CookieJarImpl) OkHttpConfig.getOkHttpClient().cookieJar();
+        return (CookieJarImpl) OkHttpConfig.getInstance().getOkHttpClient().cookieJar();
     }
 
     /**
