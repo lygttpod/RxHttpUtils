@@ -19,7 +19,7 @@
  ```
         dependencies {
         ...
-        compile 'com.github.lygttpod:RxHttpUtils:2.3.2'
+        compile 'com.github.lygttpod:RxHttpUtils:2.3.3'
         }
 ```
 
@@ -235,6 +235,11 @@ b、
  ```
 
 # 3、多baseUrl使用说明
+
+> ### 动态切换全局单个baseUrl的方法
+```
+RxUrlManager.getInstance().clear().setUrl("baseUrl");
+```
 
 ### 3.1、使用不同的baseUrl发送请求
 ```
