@@ -416,7 +416,11 @@ RxUrlManager.getInstance().clear().setUrl("baseUrl");
                                 return true;
                             }
 ```
-
+### 8、混淆
+* 如果使用到DataObserver需要对BaseData实体类混淆
+```
+     -keep class com.allen.library.bean.**{*;}
+```
 # 参数说明
 
 > 全局参数：在application中配置的参数都是以setXXX开头的,根据实际需求配置相应参数即可
